@@ -3,16 +3,22 @@ from flask import (
     Flask,
     render_template,
     request,
-    send_file
+    send_file,
+    abort
 )
 
 from Bio import SeqIO
 from Bio.Seq import Seq
 
 from io import StringIO, BytesIO
+import heapq
+import math
 
 from genomics.sequence_analysis import analyze_sequence
-from genomics.ncbi_annotation import annotate_orfs
+from genomics.ncbi_annotation import (
+    annotate_orfs,
+    annotate_genome
+)
 
 from genomics.transcriptomics_analysis import (
     analyze_rna_sequence,
@@ -23,500 +29,520 @@ from genomics.transcriptomics_analysis import (
 from genomics.omics_integration import analyze_central_dogma
 
 
+# ============================================================
+# APPLICATION CONFIGURATION
+# ============================================================
+
 app = Flask(__name__)
 
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 
+CDS_PER_PAGE = 50
 
-# ==========================================
-# CLEAN AND VALIDATE DNA SEQUENCE
-# ==========================================
+
+# ============================================================
+# DNA INPUT VALIDATION
+# ============================================================
 
 def clean_dna_sequence(raw_sequence):
 
     if not raw_sequence:
         raise ValueError("Please provide a DNA sequence.")
 
-    raw_sequence = raw_sequence.strip()
+    lines = raw_sequence.splitlines()
 
-    lines = [
+    sequence = "".join(
         line.strip()
-        for line in raw_sequence.splitlines()
-        if line.strip() and not line.strip().startswith(">")
-    ]
+        for line in lines
+        if not line.strip().startswith(">")
+    )
 
-    sequence = "".join(lines).upper()
-    sequence = "".join(sequence.split())
+    sequence = "".join(sequence.split()).upper()
 
     if not sequence:
-        raise ValueError("No DNA sequence was found.")
+        raise ValueError("The DNA sequence is empty.")
 
-    allowed_bases = set("ATGCN")
-    invalid_bases = set(sequence) - allowed_bases
+    invalid = sorted(set(sequence) - set("ATGCN"))
 
-    if invalid_bases:
+    if invalid:
         raise ValueError(
             "Invalid DNA characters detected: "
-            + ", ".join(sorted(invalid_bases))
+            + ", ".join(invalid)
             + ". Use only A, T, G, C and N."
         )
 
     return sequence
 
 
-# ==========================================
-# READ DNA FROM TEXT OR FASTA FILE
-# ==========================================
-
 def read_dna_input(pasted_sequence, uploaded_file):
 
     if uploaded_file and uploaded_file.filename:
 
+        content = uploaded_file.read().decode(
+            "utf-8",
+            errors="replace"
+        )
+
+        if not content.strip():
+            raise ValueError("The uploaded DNA file is empty.")
+
         try:
-            file_content = uploaded_file.read().decode("utf-8")
-
-        except UnicodeDecodeError:
-            raise ValueError(
-                "The uploaded file must be a text-based FASTA file."
-            )
-
-        if file_content.lstrip().startswith(">"):
-
             records = list(
-                SeqIO.parse(StringIO(file_content), "fasta")
+                SeqIO.parse(StringIO(content), "fasta")
             )
 
-            if not records:
-                raise ValueError(
-                    "No valid FASTA sequence was found."
-                )
+            if records:
+                return clean_dna_sequence(str(records[0].seq))
 
-            raw_sequence = str(records[0].seq)
+        except Exception:
+            pass
 
-        else:
-            raw_sequence = file_content
+        return clean_dna_sequence(content)
 
-    else:
-        raw_sequence = pasted_sequence
-
-    return clean_dna_sequence(raw_sequence)
+    return clean_dna_sequence(pasted_sequence)
 
 
-# ==========================================
-# CLEAN AND VALIDATE RNA SEQUENCE
-# ==========================================
+# ============================================================
+# RNA INPUT VALIDATION
+# ============================================================
 
 def clean_rna_sequence(raw_sequence):
 
     if not raw_sequence:
         raise ValueError("Please provide an RNA sequence.")
 
-    raw_sequence = raw_sequence.strip()
+    lines = raw_sequence.splitlines()
 
-    lines = [
+    sequence = "".join(
         line.strip()
-        for line in raw_sequence.splitlines()
-        if line.strip() and not line.strip().startswith(">")
-    ]
+        for line in lines
+        if not line.strip().startswith(">")
+    )
 
-    sequence = "".join(lines).upper()
-    sequence = "".join(sequence.split())
+    sequence = "".join(sequence.split()).upper()
 
     if not sequence:
-        raise ValueError("No RNA sequence was found.")
+        raise ValueError("The RNA sequence is empty.")
 
-    allowed_bases = set("AUGCN")
-    invalid_bases = set(sequence) - allowed_bases
+    invalid = sorted(set(sequence) - set("AUGCN"))
 
-    if invalid_bases:
+    if invalid:
         raise ValueError(
             "Invalid RNA characters detected: "
-            + ", ".join(sorted(invalid_bases))
+            + ", ".join(invalid)
             + ". Use only A, U, G, C and N."
         )
 
     return sequence
 
 
-# ==========================================
-# READ RNA FROM TEXT OR FASTA FILE
-# ==========================================
-
 def read_rna_input(pasted_sequence, uploaded_file):
 
     if uploaded_file and uploaded_file.filename:
 
+        content = uploaded_file.read().decode(
+            "utf-8",
+            errors="replace"
+        )
+
+        if not content.strip():
+            raise ValueError("The uploaded RNA file is empty.")
+
         try:
-            file_content = uploaded_file.read().decode("utf-8")
-
-        except UnicodeDecodeError:
-            raise ValueError(
-                "The uploaded file must be a text-based FASTA file."
-            )
-
-        if file_content.lstrip().startswith(">"):
-
             records = list(
-                SeqIO.parse(StringIO(file_content), "fasta")
+                SeqIO.parse(StringIO(content), "fasta")
             )
 
-            if not records:
-                raise ValueError(
-                    "No valid FASTA sequence was found."
-                )
+            if records:
+                return clean_rna_sequence(str(records[0].seq))
 
-            raw_sequence = str(records[0].seq)
+        except Exception:
+            pass
 
-        else:
-            raw_sequence = file_content
+        return clean_rna_sequence(content)
 
-    else:
-        raw_sequence = pasted_sequence
-
-    return clean_rna_sequence(raw_sequence)
+    return clean_rna_sequence(pasted_sequence)
 
 
-# ==========================================
+# ============================================================
 # SIX-FRAME TRANSLATION
-# ==========================================
+# ============================================================
 
 def translate_six_frames(sequence):
 
     dna = Seq(sequence)
-    reverse_dna = dna.reverse_complement()
 
-    translations = []
+    reverse_complement = dna.reverse_complement()
 
-    strands = [
+    frames = {}
+
+    for strand_name, strand_sequence in (
         ("+", dna),
-        ("-", reverse_dna)
-    ]
-
-    for strand, strand_sequence in strands:
+        ("-", reverse_complement)
+    ):
 
         for frame in range(3):
 
-            protein = strand_sequence[frame:].translate(
-                to_stop=False
+            translated = str(
+                strand_sequence[frame:].translate(
+                    to_stop=False
+                )
             )
 
-            translations.append({
-                "strand": strand,
-                "frame": frame + 1,
-                "protein_sequence": str(protein)
-            })
+            frames[f"{strand_name}{frame + 1}"] = translated
 
-    return translations
+    return frames
 
 
-# ==========================================
-# IMPROVED ORF DETECTION AND OVERLAP ANALYSIS
-# ==========================================
+# ============================================================
+# OPEN READING FRAME PREDICTION
+# ============================================================
 
 def find_orfs(sequence, minimum_length=30):
 
-    sequence = clean_dna_sequence(sequence)
-
-    dna = Seq(sequence)
-    reverse_dna = dna.reverse_complement()
+    sequence = sequence.upper()
 
     stop_codons = {"TAA", "TAG", "TGA"}
 
     orfs = []
+
     sequence_length = len(sequence)
 
     strands = [
-        ("+", str(dna)),
-        ("-", str(reverse_dna))
+        ("+", sequence),
+        ("-", str(Seq(sequence).reverse_complement()))
     ]
-
-    # ======================================
-    # STEP 1: PREDICT ORFs ON BOTH STRANDS
-    # ======================================
 
     for strand, strand_sequence in strands:
 
         for frame in range(3):
 
-            for start in range(
+            starts = []
+
+            for position in range(
                 frame,
                 len(strand_sequence) - 2,
                 3
             ):
 
-                if strand_sequence[start:start + 3] != "ATG":
-                    continue
+                codon = strand_sequence[
+                    position:position + 3
+                ]
 
-                for stop in range(
-                    start + 3,
-                    len(strand_sequence) - 2,
-                    3
-                ):
+                if codon == "ATG":
+                    starts.append(position)
 
-                    codon = strand_sequence[stop:stop + 3]
+                elif codon in stop_codons:
 
-                    if codon in stop_codons:
-
-                        dna_sequence = strand_sequence[
-                            start:stop + 3
-                        ]
+                    for start_position in starts:
 
                         protein_sequence = str(
-                            Seq(dna_sequence).translate(
-                                to_stop=True
-                            )
+                            Seq(
+                                strand_sequence[
+                                    start_position:position
+                                ]
+                            ).translate()
                         )
 
-                        protein_length = len(protein_sequence)
+                        if len(protein_sequence) < minimum_length:
+                            continue
 
-                        if protein_length >= minimum_length:
+                        if strand == "+":
 
-                            if strand == "+":
+                            start_coordinate = start_position + 1
+                            end_coordinate = position + 3
 
-                                start_position = start + 1
-                                end_position = stop + 3
+                        else:
 
-                            else:
+                            start_coordinate = (
+                                sequence_length - (position + 3) + 1
+                            )
 
-                                start_position = (
-                                    sequence_length - (stop + 3) + 1
-                                )
+                            end_coordinate = (
+                                sequence_length - start_position
+                            )
 
-                                end_position = (
-                                    sequence_length - start
-                                )
+                        orfs.append({
 
-                            orfs.append({
+                            "start": min(
+                                start_coordinate,
+                                end_coordinate
+                            ),
 
-                                "strand": strand,
-                                "frame": frame + 1,
-                                "start": start_position,
-                                "end": end_position,
-                                "length": protein_length,
-                                "dna_sequence": dna_sequence,
-                                "protein_sequence": protein_sequence
+                            "end": max(
+                                start_coordinate,
+                                end_coordinate
+                            ),
 
-                            })
+                            "strand": strand,
 
-                        # Stop at the first in-frame stop codon.
-                        break
+                            "frame": frame + 1,
 
-    # ======================================
-    # STEP 2: SORT AND NUMBER ORFs
-    # ======================================
+                            "length": len(
+                                protein_sequence
+                            ),
+
+                            "protein_sequence": protein_sequence,
+
+                            "sequence": strand_sequence[
+                                start_position:position + 3
+                            ]
+
+                        })
+
+                    starts = []
 
     orfs.sort(
-        key=lambda item: item["length"],
-        reverse=True
+        key=lambda item: (
+            -item["length"],
+            item["start"]
+        )
     )
 
-    for index, orf in enumerate(orfs):
+    for number, orf in enumerate(orfs, start=1):
+        orf["orf_number"] = number
 
-        orf["number"] = index + 1
-
-        orf["overlaps_with"] = []
-        orf["nested_in"] = []
-        orf["contains"] = []
-
-        orf["overlap_status"] = "No overlap detected"
-
-    # ======================================
-    # STEP 3: COMPARE ALL GENOMIC INTERVALS
-    # ======================================
-
-    for index, first in enumerate(orfs):
-
-        for second in orfs[index + 1:]:
-
-            overlap = (
-                first["start"] <= second["end"]
-                and second["start"] <= first["end"]
-            )
-
-            if not overlap:
-                continue
-
-            first["overlaps_with"].append(
-                second["number"]
-            )
-
-            second["overlaps_with"].append(
-                first["number"]
-            )
-
-            # ==================================
-            # STEP 4: IDENTIFY STRICT CONTAINMENT
-            # ==================================
-
-            first_contains_second = (
-                first["start"] <= second["start"]
-                and first["end"] >= second["end"]
-            )
-
-            second_contains_first = (
-                second["start"] <= first["start"]
-                and second["end"] >= first["end"]
-            )
-
-            if (
-                first_contains_second
-                and not second_contains_first
-            ):
-
-                first["contains"].append(
-                    second["number"]
-                )
-
-                second["nested_in"].append(
-                    first["number"]
-                )
-
-            elif (
-                second_contains_first
-                and not first_contains_second
-            ):
-
-                second["contains"].append(
-                    first["number"]
-                )
-
-                first["nested_in"].append(
-                    second["number"]
-                )
-
-            # Identical intervals are recorded as overlaps,
-            # but not as strict containment.
-
-    # ======================================
-    # STEP 5: CLASSIFY OVERLAP STATUS
-    # ======================================
+    # Determine overlap relationships.
 
     for orf in orfs:
 
-        if orf["nested_in"]:
+        orf["overlaps"] = []
 
-            orf["overlap_status"] = "Nested ORF"
+        for other in orfs:
 
-        elif orf["contains"]:
+            if orf["orf_number"] == other["orf_number"]:
+                continue
 
-            orf["overlap_status"] = "Contains nested ORF"
+            if (
+                orf["start"] <= other["end"]
+                and other["start"] <= orf["end"]
+            ):
 
-        elif orf["overlaps_with"]:
-
-            orf["overlap_status"] = "Overlapping ORF"
-
-        else:
-
-            orf["overlap_status"] = "No overlap detected"
-
-        orf["overlaps_with"].sort()
-        orf["nested_in"].sort()
-        orf["contains"].sort()
+                orf["overlaps"].append(
+                    other["orf_number"]
+                )
 
     return orfs
 
 
-# ==========================================
-# BUILD SIX ORF VISUALIZATION TRACKS
-# ==========================================
+# ============================================================
+# ORF VISUALIZATION TRACKS
+# ============================================================
 
 def build_orf_tracks(predicted_orfs, sequence_length):
 
+    track_names = [
+        "+1", "+2", "+3",
+        "-1", "-2", "-3"
+    ]
+
     tracks = []
 
-    if sequence_length <= 0:
-        return tracks
+    for track_name in track_names:
 
-    ticks = sorted(set([
-        1,
-        max(1, round(sequence_length * 0.25)),
-        max(1, round(sequence_length * 0.50)),
-        max(1, round(sequence_length * 0.75)),
-        sequence_length
-    ]))
+        strand = track_name[0]
+        frame = int(track_name[1])
 
-    for strand in ["+", "-"]:
-
-        for frame in range(1, 4):
-
-            frame_orfs = [
-                dict(orf)
-                for orf in predicted_orfs
-                if (
-                    orf["strand"] == strand
-                    and orf["frame"] == frame
-                )
-            ]
-
-            frame_orfs.sort(
-                key=lambda item: (
-                    item["start"],
-                    item["end"]
-                )
+        matching_orfs = [
+            orf for orf in predicted_orfs
+            if (
+                orf["strand"] == strand
+                and orf["frame"] == frame
             )
+        ]
 
-            lane_ends = []
+        matching_orfs.sort(
+            key=lambda item: item["start"]
+        )
 
-            for orf in frame_orfs:
+        lanes = []
+        lane_end_positions = []
 
-                lane = None
+        for orf in matching_orfs:
 
-                for index, last_end in enumerate(lane_ends):
+            assigned_lane = None
 
-                    if orf["start"] > last_end:
-                        lane = index
-                        break
+            for lane_index, lane_end in enumerate(
+                lane_end_positions
+            ):
 
-                if lane is None:
+                if orf["start"] > lane_end:
 
-                    lane = len(lane_ends)
-                    lane_ends.append(orf["end"])
+                    assigned_lane = lane_index
+                    break
 
-                else:
+            if assigned_lane is None:
 
-                    lane_ends[lane] = orf["end"]
+                assigned_lane = len(lanes)
 
-                orf["lane"] = lane
+                lanes.append([])
+                lane_end_positions.append(0)
 
-            tracks.append({
+            lanes[assigned_lane].append(orf)
 
-                "strand": strand,
-                "frame": frame,
-                "orfs": frame_orfs,
-                "lane_count": max(1, len(lane_ends)),
-                "ticks": ticks
+            lane_end_positions[assigned_lane] = orf["end"]
 
-            })
+        tracks.append({
+
+            "name": track_name,
+
+            "strand": strand,
+
+            "frame": frame,
+
+            "lanes": lanes
+
+        })
 
     return tracks
 
 
-# ==========================================
-# CREATE FASTA DOWNLOAD
-# ==========================================
+# ============================================================
+# FASTA DOWNLOAD HELPER
+# ============================================================
 
 def fasta_download(filename, header, sequence):
 
-    if not sequence:
-        return "No sequence is available to download.", 400
+    fasta_text = f">{header}\n"
 
-    fasta_content = f">{header}\n{sequence}\n"
+    for index in range(0, len(sequence), 70):
+        fasta_text += sequence[index:index + 70] + "\n"
 
-    file_data = BytesIO(
-        fasta_content.encode("utf-8")
+    buffer = BytesIO(
+        fasta_text.encode("utf-8")
     )
 
+    buffer.seek(0)
+
     return send_file(
-        file_data,
+        buffer,
         mimetype="text/plain",
         as_attachment=True,
         download_name=filename
     )
 
 
-# ==========================================
-# HOME PAGE
-# ==========================================
+# ============================================================
+# GENOME EXPLORER PREPARATION
+# ============================================================
+
+def prepare_genome_explorer(
+    accession,
+    search="",
+    page=1
+):
+
+    accession = accession.strip().upper()
+
+    search = search.strip()
+
+    page = max(1, int(page))
+
+    # annotate_genome uses an LRU cache.
+    # Moving between pages for the same accession
+    # reuses the cached result while Flask remains running.
+
+    genome_data = annotate_genome(accession)
+
+    all_records = genome_data.get(
+        "cds_records",
+        []
+    )
+
+    if search:
+
+        search_lower = search.lower()
+
+        filtered_records = []
+
+        for record in all_records:
+
+            searchable_fields = [
+
+                record.get("gene", ""),
+
+                record.get("locus_tag", ""),
+
+                record.get("product", ""),
+
+                record.get("protein_id", "")
+
+            ]
+
+            searchable_text = " ".join(
+                str(value)
+                for value in searchable_fields
+            ).lower()
+
+            if search_lower in searchable_text:
+                filtered_records.append(record)
+
+    else:
+
+        filtered_records = all_records
+
+    total_records = len(filtered_records)
+
+    total_pages = max(
+        1,
+        math.ceil(total_records / CDS_PER_PAGE)
+    )
+
+    page = min(page, total_pages)
+
+    start_index = (
+        page - 1
+    ) * CDS_PER_PAGE
+
+    end_index = start_index + CDS_PER_PAGE
+
+    page_records = filtered_records[
+        start_index:end_index
+    ]
+
+    # Do not send all protein sequences to the browser.
+    # Only send the records required for this page.
+
+    display_records = []
+
+    for record in page_records:
+
+        display_records.append({
+
+            key: value
+
+            for key, value in record.items()
+
+            if key != "protein_sequence"
+
+        })
+
+    summary = {
+        key: value
+        for key, value in genome_data.items()
+        if key != "cds_records"
+    }
+
+    return {
+
+        "genome_summary": summary,
+
+        "cds_records": display_records,
+
+        "search_term": search,
+
+        "total_records": total_records,
+
+        "page": page,
+
+        "total_pages": total_pages
+
+    }
+
+
+# ============================================================
+# HOME
+# ============================================================
 
 @app.route("/")
 def home():
@@ -524,627 +550,686 @@ def home():
     return render_template("index.html")
 
 
-# ==========================================
+# ============================================================
 # GENOMICS WORKSPACE
-# ==========================================
+# ============================================================
 
 @app.route("/genomics", methods=["GET", "POST"])
 def genomics():
 
-    results = None
-    error = None
-    sequence_input = ""
-    translations = []
-    predicted_orfs = []
-    orf_tracks = []
-    sequence_length = 0
+    if request.method == "GET":
 
-    if request.method == "POST":
+        return render_template(
+            "genomics.html"
+        )
 
-        try:
-
-            uploaded_file = (
-                request.files.get("file")
-                or request.files.get("fasta_file")
-            )
-
-            sequence = read_dna_input(
-                request.form.get("sequence", ""),
-                uploaded_file
-            )
-
-            results = analyze_sequence(sequence)
-
-            sequence_input = sequence
-            sequence_length = len(sequence)
-
-            translations = translate_six_frames(sequence)
-
-            predicted_orfs = find_orfs(sequence)
-
-            orf_tracks = build_orf_tracks(
-                predicted_orfs,
-                sequence_length
-            )
-
-        except Exception as e:
-
-            error = str(e)
-
-    return render_template(
-        "genomics.html",
-        results=results,
-        error=error,
-        sequence_input=sequence_input,
-        translations=translations,
-        predicted_orfs=predicted_orfs,
-        orf_tracks=orf_tracks,
-        sequence_length=sequence_length
+    sequence_input = request.form.get(
+        "sequence",
+        ""
     )
 
-
-# ==========================================
-# NCBI PROTEIN ANNOTATION
-# ==========================================
-
-@app.route("/annotation", methods=["GET", "POST"])
-def annotation():
-
-    results = None
-    error = None
-    accession = "U91966.1"
-    predicted_orfs = []
-    predicted_orf_count = 0
-    sequence_input = ""
-    orf_tracks = []
-    sequence_length = 0
-    best_orf_number = None
-
-    if request.method == "POST":
-
-        try:
-
-            accession = request.form.get(
-                "accession",
-                "U91966.1"
-            ).strip()
-
-            uploaded_file = (
-                request.files.get("file")
-                or request.files.get("fasta_file")
-            )
-
-            sequence = read_dna_input(
-                request.form.get("sequence", ""),
-                uploaded_file
-            )
-
-            sequence_input = sequence
-            sequence_length = len(sequence)
-
-            analyze_sequence(sequence)
-
-            # Predict ORFs and identify genomic overlaps.
-
-            predicted_orfs = find_orfs(sequence)
-
-            predicted_orf_count = len(predicted_orfs)
-
-            if not predicted_orfs:
-
-                raise ValueError(
-                    "No ORFs of at least 30 amino acids were detected."
-                )
-
-            # Build the six genomic visualization tracks.
-
-            orf_tracks = build_orf_tracks(
-                predicted_orfs,
-                sequence_length
-            )
-
-            print("Predicted ORFs:", predicted_orf_count)
-
-            # Retrieve NCBI annotations and compare proteins.
-
-            results = annotate_orfs(
-                accession,
-                predicted_orfs
-            )
-
-            results["predicted_orf_count"] = predicted_orf_count
-
-            # Attach coordinates and overlap data to each match.
-
-            for match_item in results["matches"]:
-
-                orf_number = match_item.get("orf_number")
-
-                matching_orf = next(
-                    (
-                        orf for orf in predicted_orfs
-                        if orf["number"] == orf_number
-                    ),
-                    None
-                )
-
-                if matching_orf:
-
-                    match_item["orf_start"] = matching_orf["start"]
-                    match_item["orf_end"] = matching_orf["end"]
-
-                    match_item["overlap_status"] = (
-                        matching_orf["overlap_status"]
-                    )
-
-                    match_item["overlaps_with"] = (
-                        matching_orf["overlaps_with"]
-                    )
-
-                    match_item["nested_in"] = (
-                        matching_orf["nested_in"]
-                    )
-
-                    match_item["contains"] = (
-                        matching_orf["contains"]
-                    )
-
-                    match_item["orf_dna_sequence"] = (
-                        matching_orf["dna_sequence"]
-                    )
-
-                    match_item["orf_protein_sequence"] = (
-                        matching_orf["protein_sequence"]
-                    )
-
-            # Select the best match using the same
-            # ranking principle as the interpretation dashboard.
-
-            if results["matches"]:
-
-                best_match = max(
-                    results["matches"],
-                    key=lambda item: (
-                        min(
-                            item["match"]["query_coverage"],
-                            item["match"]["reference_coverage"]
-                        ),
-                        item["match"]["identity"],
-                        item["match"]["alignment_score"]
-                    )
-                )
-
-                best_orf_number = best_match["orf_number"]
-
-            print("NCBI annotation completed.")
-
-            print(
-                "Annotated matches:",
-                len(results["matches"])
-            )
-
-            print(
-                "Best matching ORF:",
-                best_orf_number
-            )
-
-        except Exception as e:
-
-            error = str(e)
-            results = None
-
-            print("ANNOTATION ERROR:", error)
-
-    return render_template(
-        "annotation.html",
-        results=results,
-        error=error,
-        accession=accession,
-        sequence_input=sequence_input,
-        predicted_orfs=predicted_orfs,
-        predicted_orf_count=predicted_orf_count,
-        orf_tracks=orf_tracks,
-        sequence_length=sequence_length,
-        best_orf_number=best_orf_number
+    uploaded_file = request.files.get(
+        "file"
     )
-
-
-# ==========================================
-# DOWNLOAD DNA REVERSE COMPLEMENT
-# ==========================================
-
-@app.route("/download-reverse-complement", methods=["POST"])
-def download_reverse_complement():
 
     try:
 
-        sequence = clean_dna_sequence(
-            request.form.get("sequence", "")
+        sequence = read_dna_input(
+            sequence_input,
+            uploaded_file
+        )
+
+        analysis = analyze_sequence(sequence)
+
+        predicted_orfs = find_orfs(sequence)
+
+        translations = translate_six_frames(sequence)
+
+        orf_tracks = build_orf_tracks(
+            predicted_orfs,
+            len(sequence)
         )
 
         reverse_complement = str(
             Seq(sequence).reverse_complement()
         )
 
-        return fasta_download(
-            "reverse_complement.fasta",
-            "OmicsBridge_Reverse_Complement",
-            reverse_complement
+        return render_template(
+
+            "genomics.html",
+
+            analysis=analysis,
+
+            sequence=sequence,
+
+            sequence_input=sequence_input,
+
+            predicted_orfs=predicted_orfs,
+
+            predicted_orf_count=len(predicted_orfs),
+
+            translations=translations,
+
+            orf_tracks=orf_tracks,
+
+            sequence_length=len(sequence),
+
+            reverse_complement=reverse_complement
+
         )
 
-    except Exception as e:
+    except Exception as error:
 
-        return str(e), 400
+        return render_template(
+            "genomics.html",
+            error=str(error),
+            sequence_input=sequence_input
+        )
 
 
-# ==========================================
-# DOWNLOAD PROTEIN FASTA
-# ==========================================
+# ============================================================
+# NCBI ANNOTATION WORKSPACE
+# ============================================================
+
+@app.route("/annotation", methods=["GET", "POST"])
+def annotation():
+
+    # --------------------------------------------------------
+    # GET REQUEST: GENOME EXPLORER
+    # --------------------------------------------------------
+
+    if request.method == "GET":
+
+        analysis_mode = request.args.get(
+            "analysis_mode",
+            "protein_comparison"
+        )
+
+        if analysis_mode == "genome_explorer":
+
+            accession = request.args.get(
+                "accession",
+                ""
+            )
+
+            search = request.args.get(
+                "search",
+                ""
+            )
+
+            try:
+
+                page = int(
+                    request.args.get("page", 1)
+                )
+
+                if page < 1:
+                    page = 1
+
+            except (ValueError, TypeError):
+
+                page = 1
+
+            if not accession:
+
+                return render_template(
+                    "annotation.html",
+                    analysis_mode="genome_explorer",
+                    accession="",
+                    genome_summary=None,
+                    cds_records=[],
+                    search_term=search,
+                    total_records=0,
+                    page=1,
+                    total_pages=1
+                )
+
+            try:
+
+                explorer_data = prepare_genome_explorer(
+                    accession,
+                    search,
+                    page
+                )
+
+                return render_template(
+                    "annotation.html",
+                    analysis_mode="genome_explorer",
+                    accession=accession,
+                    **explorer_data
+                )
+
+            except Exception as error:
+
+                return render_template(
+                    "annotation.html",
+                    analysis_mode="genome_explorer",
+                    accession=accession,
+                    error=str(error),
+                    genome_summary=None,
+                    cds_records=[],
+                    search_term=search,
+                    total_records=0,
+                    page=1,
+                    total_pages=1
+                )
+
+        return render_template(
+            "annotation.html",
+            analysis_mode="protein_comparison",
+            accession="U91966.1"
+        )
+
+    # --------------------------------------------------------
+    # POST REQUEST: PROTEIN COMPARISON
+    # --------------------------------------------------------
+
+    analysis_mode = request.form.get(
+        "analysis_mode",
+        "protein_comparison"
+    )
+
+    if analysis_mode != "protein_comparison":
+
+        return render_template(
+            "annotation.html",
+            error="Unsupported annotation analysis mode."
+        )
+
+    accession = request.form.get(
+        "accession",
+        "U91966.1"
+    ).strip()
+
+    sequence_input = request.form.get(
+        "sequence",
+        ""
+    )
+
+    uploaded_file = request.files.get(
+        "file"
+    )
+
+    try:
+
+        sequence = read_dna_input(
+            sequence_input,
+            uploaded_file
+        )
+
+        sequence_analysis = analyze_sequence(
+            sequence
+        )
+
+        predicted_orfs = find_orfs(
+            sequence
+        )
+
+        orf_tracks = build_orf_tracks(
+            predicted_orfs,
+            len(sequence)
+        )
+
+        # Fetch reference annotations and compare proteins.
+
+        results = annotate_orfs(
+            accession,
+            predicted_orfs
+        )
+
+        # Attach the predicted ORF details to each match.
+
+        orf_lookup = {
+            orf["orf_number"]: orf
+            for orf in predicted_orfs
+        }
+
+        for match in results.get("matches", []):
+
+            orf_number = match.get(
+                "orf_number"
+            )
+
+            matching_orf = orf_lookup.get(
+                orf_number,
+                {}
+            )
+
+            match["start"] = matching_orf.get(
+                "start"
+            )
+
+            match["end"] = matching_orf.get(
+                "end"
+            )
+
+            match["strand"] = matching_orf.get(
+                "strand"
+            )
+
+            match["frame"] = matching_orf.get(
+                "frame"
+            )
+
+            match["orf_length"] = matching_orf.get(
+                "length"
+            )
+
+            match["overlaps"] = matching_orf.get(
+                "overlaps",
+                []
+            )
+
+        best_orf = None
+
+        if results.get("matches"):
+
+            best_orf = max(
+                results["matches"],
+                key=lambda item: (
+                    min(
+                        item.get("query_coverage", 0),
+                        item.get("reference_coverage", 0)
+                    ),
+                    item.get("identity", 0),
+                    item.get("score", 0)
+                )
+            )
+
+        return render_template(
+
+            "annotation.html",
+
+            analysis_mode="protein_comparison",
+
+            accession=accession,
+
+            sequence_input=sequence_input,
+
+            sequence=sequence,
+
+            sequence_analysis=sequence_analysis,
+
+            predicted_orfs=predicted_orfs,
+
+            predicted_orf_count=len(predicted_orfs),
+
+            orf_tracks=orf_tracks,
+
+            sequence_length=len(sequence),
+
+            results=results,
+
+            best_orf_number=(
+                best_orf.get("orf_number")
+                if best_orf
+                else None
+            )
+
+        )
+
+    except Exception as error:
+
+        return render_template(
+
+            "annotation.html",
+
+            analysis_mode="protein_comparison",
+
+            accession=accession,
+
+            sequence_input=sequence_input,
+
+            error=str(error)
+
+        )
+
+
+# ============================================================
+# GENOMICS DOWNLOAD ROUTES
+# ============================================================
+
+@app.route("/download-reverse-complement", methods=["POST"])
+def download_reverse_complement():
+
+    sequence = clean_dna_sequence(
+        request.form.get("sequence", "")
+    )
+
+    result = str(
+        Seq(sequence).reverse_complement()
+    )
+
+    return fasta_download(
+        "reverse_complement.fasta",
+        "Reverse_Complement",
+        result
+    )
+
 
 @app.route("/download-protein-fasta", methods=["POST"])
 def download_protein_fasta():
 
-    protein_sequence = request.form.get(
-        "protein_sequence",
+    sequence = clean_dna_sequence(
         request.form.get("sequence", "")
     )
 
-    return fasta_download(
-        "protein_sequence.fasta",
-        "OmicsBridge_Protein",
-        protein_sequence
+    protein = str(
+        Seq(sequence).translate(
+            to_stop=False
+        )
     )
 
+    return fasta_download(
+        "translated_protein.fasta",
+        "Translated_Protein",
+        protein
+    )
 
-# ==========================================
-# DOWNLOAD LONGEST ORF
-# ==========================================
 
 @app.route("/download-longest-orf", methods=["POST"])
 def download_longest_orf():
 
-    try:
+    sequence = clean_dna_sequence(
+        request.form.get("sequence", "")
+    )
 
-        sequence = clean_dna_sequence(
-            request.form.get("sequence", "")
-        )
+    predicted_orfs = find_orfs(sequence)
 
-        predicted_orfs = find_orfs(sequence)
+    if not predicted_orfs:
 
-        if not predicted_orfs:
-            return "No ORFs were detected.", 404
+        return "No ORFs were detected.", 400
 
-        longest_orf = predicted_orfs[0]
+    longest_orf = predicted_orfs[0]
 
-        return fasta_download(
-            "longest_orf.fasta",
-            f"OmicsBridge_ORF_{longest_orf['number']}",
-            longest_orf["protein_sequence"]
-        )
-
-    except Exception as e:
-
-        return str(e), 400
+    return fasta_download(
+        "longest_orf.fasta",
+        f"ORF_{longest_orf['orf_number']}",
+        longest_orf["protein_sequence"]
+    )
 
 
-# ==========================================
+# ============================================================
 # TRANSCRIPTOMICS WORKSPACE
-# ==========================================
+# ============================================================
 
 @app.route("/transcriptomics", methods=["GET", "POST"])
 def transcriptomics():
 
-    results = None
-    error = None
-    sequence_input = ""
-    dna_sequence = ""
-    protein_sequence = ""
+    if request.method == "GET":
 
-    if request.method == "POST":
+        return render_template(
+            "transcriptomics.html"
+        )
 
-        print("TRANSCRIPTOMICS POST REQUEST RECEIVED")
-
-        try:
-
-            uploaded_file = (
-                request.files.get("file")
-                or request.files.get("fasta_file")
-            )
-
-            sequence = read_rna_input(
-                request.form.get("sequence", ""),
-                uploaded_file
-            )
-
-            results = analyze_rna_sequence(sequence)
-
-            dna_sequence = convert_rna_to_dna(sequence)
-
-            sequence_input = sequence
-
-            if len(sequence) % 3 == 0:
-                protein_sequence = translate_rna(sequence)
-
-        except Exception as e:
-
-            error = str(e)
-
-            print("TRANSCRIPTOMICS ERROR:", error)
-
-    return render_template(
-        "transcriptomics.html",
-        results=results,
-        error=error,
-        sequence_input=sequence_input,
-        dna_sequence=dna_sequence,
-        protein_sequence=protein_sequence
+    sequence_input = request.form.get(
+        "sequence",
+        ""
     )
 
+    uploaded_file = request.files.get(
+        "file"
+    )
 
-# ==========================================
-# TRANSCRIPTOMICS DOWNLOADS
-# ==========================================
+    try:
+
+        sequence = read_rna_input(
+            sequence_input,
+            uploaded_file
+        )
+
+        analysis = analyze_rna_sequence(
+            sequence
+        )
+
+        dna_equivalent = convert_rna_to_dna(
+            sequence
+        )
+
+        protein = translate_rna(
+            sequence
+        )
+
+        complement = str(
+            Seq(sequence).complement_rna()
+        )
+
+        reverse_complement = str(
+            Seq(sequence).reverse_complement_rna()
+        )
+
+        return render_template(
+
+            "transcriptomics.html",
+
+            sequence=sequence,
+
+            sequence_input=sequence_input,
+
+            analysis=analysis,
+
+            dna_equivalent=dna_equivalent,
+
+            protein=protein,
+
+            complement=complement,
+
+            reverse_complement=reverse_complement
+
+        )
+
+    except Exception as error:
+
+        return render_template(
+            "transcriptomics.html",
+            error=str(error),
+            sequence_input=sequence_input
+        )
+
+
+# ============================================================
+# TRANSCRIPTOMICS DOWNLOAD ROUTES
+# ============================================================
 
 @app.route("/download-rna-complement", methods=["POST"])
 def download_rna_complement():
 
-    try:
+    sequence = clean_rna_sequence(
+        request.form.get("sequence", "")
+    )
 
-        sequence = clean_rna_sequence(
-            request.form.get("sequence", "")
-        )
+    complement = str(
+        Seq(sequence).complement_rna()
+    )
 
-        results = analyze_rna_sequence(sequence)
-
-        return fasta_download(
-            "rna_complement.fasta",
-            "OmicsBridge_RNA_Complement",
-            results["complementary_sequence"]
-        )
-
-    except Exception as e:
-
-        return str(e), 400
+    return fasta_download(
+        "rna_complement.fasta",
+        "RNA_Complement",
+        complement
+    )
 
 
 @app.route("/download-rna-reverse-complement", methods=["POST"])
 def download_rna_reverse_complement():
 
-    try:
+    sequence = clean_rna_sequence(
+        request.form.get("sequence", "")
+    )
 
-        sequence = clean_rna_sequence(
-            request.form.get("sequence", "")
-        )
+    reverse_complement = str(
+        Seq(sequence).reverse_complement_rna()
+    )
 
-        results = analyze_rna_sequence(sequence)
-
-        return fasta_download(
-            "rna_reverse_complement.fasta",
-            "OmicsBridge_RNA_Reverse_Complement",
-            results["reverse_complement"]
-        )
-
-    except Exception as e:
-
-        return str(e), 400
+    return fasta_download(
+        "rna_reverse_complement.fasta",
+        "RNA_Reverse_Complement",
+        reverse_complement
+    )
 
 
 @app.route("/download-rna-dna", methods=["POST"])
 def download_rna_dna():
 
-    try:
+    sequence = clean_rna_sequence(
+        request.form.get("sequence", "")
+    )
 
-        sequence = clean_rna_sequence(
-            request.form.get("sequence", "")
-        )
+    dna = convert_rna_to_dna(
+        sequence
+    )
 
-        dna_sequence = convert_rna_to_dna(sequence)
-
-        return fasta_download(
-            "rna_to_dna.fasta",
-            "OmicsBridge_DNA_From_RNA",
-            dna_sequence
-        )
-
-    except Exception as e:
-
-        return str(e), 400
+    return fasta_download(
+        "rna_dna_equivalent.fasta",
+        "DNA_Equivalent",
+        dna
+    )
 
 
 @app.route("/download-rna-protein", methods=["POST"])
 def download_rna_protein():
 
-    try:
+    sequence = clean_rna_sequence(
+        request.form.get("sequence", "")
+    )
 
-        sequence = clean_rna_sequence(
-            request.form.get("sequence", "")
-        )
+    protein = translate_rna(
+        sequence
+    )
 
-        protein_sequence = translate_rna(sequence)
-
-        return fasta_download(
-            "rna_protein.fasta",
-            "OmicsBridge_Translated_Protein",
-            protein_sequence
-        )
-
-    except Exception as e:
-
-        return str(e), 400
+    return fasta_download(
+        "rna_protein.fasta",
+        "Translated_Protein",
+        protein
+    )
 
 
-# ==========================================
-# OMICS INTEGRATION
-# ==========================================
+# ============================================================
+# OMICS INTEGRATION WORKSPACE
+# ============================================================
 
 @app.route("/integration", methods=["GET", "POST"])
 def integration():
 
-    results = None
-    error = None
-    sequence_input = ""
+    if request.method == "GET":
 
-    if request.method == "POST":
+        return render_template(
+            "integration.html"
+        )
 
-        try:
-
-            uploaded_file = (
-                request.files.get("file")
-                or request.files.get("fasta_file")
-            )
-
-            sequence = read_dna_input(
-                request.form.get("sequence", ""),
-                uploaded_file
-            )
-
-            results = analyze_central_dogma(sequence)
-
-            sequence_input = sequence
-
-            print("OMICS INTEGRATION ANALYSIS COMPLETED.")
-
-        except Exception as e:
-
-            error = str(e)
-
-            print("OMICS INTEGRATION ERROR:", error)
-
-    return render_template(
-        "integration.html",
-        results=results,
-        error=error,
-        sequence_input=sequence_input
+    sequence_input = request.form.get(
+        "sequence",
+        ""
     )
 
+    uploaded_file = request.files.get(
+        "file"
+    )
 
-# ==========================================
-# INTEGRATION DNA FASTA DOWNLOAD
-# ==========================================
+    try:
+
+        sequence = read_dna_input(
+            sequence_input,
+            uploaded_file
+        )
+
+        results = analyze_central_dogma(
+            sequence
+        )
+
+        return render_template(
+
+            "integration.html",
+
+            sequence=sequence,
+
+            sequence_input=sequence_input,
+
+            results=results
+
+        )
+
+    except Exception as error:
+
+        return render_template(
+            "integration.html",
+            error=str(error),
+            sequence_input=sequence_input
+        )
+
+
+# ============================================================
+# OMICS INTEGRATION DOWNLOAD ROUTES
+# ============================================================
 
 @app.route("/download-integration-dna", methods=["POST"])
 def download_integration_dna():
 
-    try:
+    sequence = clean_dna_sequence(
+        request.form.get("sequence", "")
+    )
 
-        sequence = clean_dna_sequence(
-            request.form.get("sequence", "")
-        )
+    return fasta_download(
+        "integration_dna.fasta",
+        "DNA_Sequence",
+        sequence
+    )
 
-        return fasta_download(
-            "omicsbridge_dna.fasta",
-            "OmicsBridge_DNA_coding_strand",
-            sequence
-        )
-
-    except Exception as e:
-
-        return str(e), 400
-
-
-# ==========================================
-# INTEGRATION mRNA FASTA DOWNLOAD
-# ==========================================
 
 @app.route("/download-integration-rna", methods=["POST"])
 def download_integration_rna():
 
-    try:
+    sequence = clean_dna_sequence(
+        request.form.get("sequence", "")
+    )
 
-        sequence = clean_rna_sequence(
-            request.form.get("sequence", "")
-        )
+    rna = sequence.replace("T", "U")
 
-        return fasta_download(
-            "omicsbridge_mRNA.fasta",
-            "OmicsBridge_generated_mRNA",
-            sequence
-        )
+    return fasta_download(
+        "integration_mrna.fasta",
+        "mRNA_Sequence",
+        rna
+    )
 
-    except Exception as e:
-
-        return str(e), 400
-
-
-# ==========================================
-# INTEGRATION PROTEIN FASTA DOWNLOAD
-# ==========================================
 
 @app.route("/download-integration-protein", methods=["POST"])
 def download_integration_protein():
 
-    try:
+    sequence = clean_dna_sequence(
+        request.form.get("sequence", "")
+    )
 
-        sequence = request.form.get(
-            "sequence",
-            ""
-        ).strip().upper()
-
-        sequence = "".join(sequence.split())
-
-        if not sequence:
-
-            raise ValueError(
-                "No protein sequence was provided."
-            )
-
-        allowed_amino_acids = set(
-            "ACDEFGHIKLMNPQRSTVWYX*"
+    protein = str(
+        Seq(sequence).translate(
+            to_stop=False
         )
+    )
 
-        invalid_characters = set(sequence) - allowed_amino_acids
-
-        if invalid_characters:
-
-            raise ValueError(
-                "Invalid protein characters detected: "
-                + ", ".join(sorted(invalid_characters))
-            )
-
-        return fasta_download(
-            "omicsbridge_protein.fasta",
-            "OmicsBridge_translated_protein",
-            sequence
-        )
-
-    except Exception as e:
-
-        return str(e), 400
+    return fasta_download(
+        "integration_protein.fasta",
+        "Translated_Protein",
+        protein
+    )
 
 
-# ==========================================
-# FILE SIZE ERROR HANDLER
-# ==========================================
+# ============================================================
+# FILE UPLOAD ERROR HANDLING
+# ============================================================
 
 @app.errorhandler(413)
 def request_entity_too_large(error):
 
     return (
-        "The uploaded file exceeds the 5 MB limit.",
+        "The uploaded file is too large. "
+        "The maximum permitted upload size is 5 MB.",
         413
     )
 
 
-# ==========================================
-# RUN APPLICATION
-# ==========================================
+# ============================================================
+# APPLICATION ENTRY POINT
+# ============================================================
 
 if __name__ == "__main__":
-
-    print("\n====================================")
-    print("          OMICSBRIDGE ROUTES")
-    print("====================================")
-
-    for route in app.url_map.iter_rules():
-
-        print(
-            route.rule,
-            sorted(route.methods)
-        )
-
-    print("====================================")
-    print("Starting OmicsBridge...")
-    print("====================================\n")
 
     app.run(
         host="127.0.0.1",

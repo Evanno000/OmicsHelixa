@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmicsBridge | Genomics Workspace</title>
+    <title>OmicsHelixa | Genomics Workspace</title>
 
     <style>
         :root {
@@ -34,15 +33,8 @@
             line-height: 1.55;
         }
 
-        /* HEADER AND NAVIGATION */
-
         header {
-            background: linear-gradient(
-                120deg,
-                #101c3d,
-                #173b70,
-                #075985
-            );
+            background: linear-gradient(120deg, #101c3d, #173b70, #075985);
             color: white;
             padding: 22px max(5%, calc((100% - 1200px) / 2));
             border-bottom: 4px solid #38bdf8;
@@ -86,8 +78,6 @@
             margin: 28px auto 60px;
         }
 
-        /* PANELS */
-
         .panel {
             background: var(--surface);
             border: 1px solid var(--line);
@@ -122,8 +112,6 @@
             color: var(--muted);
         }
 
-        /* INDIVIDUAL SECTION COLOURS */
-
         .input-panel {
             border-top-color: #0ea5e9;
             background: linear-gradient(145deg, #ffffff, #f0f9ff);
@@ -149,8 +137,6 @@
             background: linear-gradient(145deg, #ffffff, #fdf2f8);
         }
 
-        /* INPUT FIELDS */
-
         textarea,
         input[type="file"] {
             width: 100%;
@@ -173,8 +159,6 @@
             border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
         }
-
-        /* BUTTONS */
 
         button,
         .download-button {
@@ -202,8 +186,6 @@
             background: linear-gradient(120deg, #475569, #334155);
         }
 
-        /* ERRORS */
-
         .error {
             background: #fef2f2;
             border: 1px solid #fecaca;
@@ -212,8 +194,6 @@
             border-radius: 8px;
             margin-bottom: 20px;
         }
-
-        /* SEQUENCE STATISTICS */
 
         .stats {
             display: grid;
@@ -277,8 +257,6 @@
             color: #115e59;
         }
 
-        /* SEQUENCE DISPLAY */
-
         .sequence-box {
             max-height: 260px;
             overflow: auto;
@@ -294,7 +272,70 @@
             line-height: 1.8;
         }
 
-        /* ORF MAP SUMMARY */
+        /* IUPAC COMPOSITION */
+
+        .ambiguity-panel {
+            margin-top: 20px;
+            padding: 17px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 11px;
+        }
+
+        .ambiguity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .ambiguity-card {
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 9px;
+            padding: 13px;
+            text-align: center;
+        }
+
+        .ambiguity-card strong {
+            display: block;
+            font-size: 22px;
+            color: #1d4ed8;
+        }
+
+        .ambiguity-card span {
+            color: #475569;
+            font-size: 12px;
+        }
+
+        .ambiguity-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .ambiguity-total {
+            padding: 15px;
+            border-radius: 9px;
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .ambiguity-total strong {
+            display: block;
+            font-size: 23px;
+        }
+
+        .ambiguity-note {
+            background: #f0f9ff;
+            border-left: 4px solid #0891b2;
+            padding: 13px;
+            margin-top: 15px;
+            border-radius: 7px;
+            font-size: .9rem;
+            color: #475569;
+        }
 
         .map-summary {
             display: flex;
@@ -312,8 +353,6 @@
             color: #3730a3;
             font-weight: 600;
         }
-
-        /* ORF LEGEND */
 
         .legend {
             display: flex;
@@ -344,8 +383,6 @@
         .reverse {
             background: var(--orange);
         }
-
-        /* ORF MAP */
 
         .map-container {
             background: linear-gradient(145deg, #eff6ff, #f5f3ff);
@@ -436,8 +473,6 @@
             pointer-events: none;
         }
 
-        /* FORWARD AND REVERSE TRACK COLOURS */
-
         .track:nth-child(-n+3) .orf-block rect {
             fill: #2563eb !important;
         }
@@ -459,8 +494,6 @@
             color: var(--muted);
             margin-top: 12px;
         }
-
-        /* ORF DETAILS */
 
         .details-heading {
             margin-top: 25px;
@@ -526,8 +559,6 @@
             overflow-wrap: anywhere;
         }
 
-        /* ORF TABLE */
-
         .orf-table-wrap {
             overflow-x: auto;
         }
@@ -589,8 +620,6 @@
             font-weight: 700;
         }
 
-        /* TRANSLATION CARDS */
-
         .translation-card {
             background: linear-gradient(120deg, #fff1f2, #fdf2f8);
             border: 1px solid #f9a8d4;
@@ -613,10 +642,7 @@
             display: inline;
         }
 
-        /* RESPONSIVE DESIGN */
-
         @media (max-width: 650px) {
-
             .panel {
                 padding: 16px;
                 border-radius: 12px;
@@ -649,7 +675,7 @@
 
 <header>
 
-    <h1>OmicsBridge</h1>
+    <h1>OmicsHelixa</h1>
 
     <p>Genomics Workspace | DNA sequence analysis and ORF exploration</p>
 
@@ -665,16 +691,15 @@
 
 <main>
 
-    <!-- DNA INPUT -->
-
     <section class="panel input-panel">
 
         <h2>DNA Sequence Analysis</h2>
 
         <p class="muted">
             Paste a DNA sequence or upload a FASTA file.
-            Analysis includes nucleotide composition, six-frame translation
-            and predicted open reading frames.
+            Analysis includes nucleotide composition, six-frame translation,
+            reverse complement and predicted open reading frames.
+            Standard DNA IUPAC ambiguity codes are supported.
         </p>
 
         <form method="POST" enctype="multipart/form-data">
@@ -686,7 +711,7 @@
             <textarea
                 id="sequence"
                 name="sequence"
-                placeholder="Paste DNA sequence here, or upload a FASTA file below..."
+                placeholder="Enter DNA using A, T, G, C, R, Y, S, W, K, M, B, D, H, V or N..."
             >{{ sequence_input or "" }}</textarea>
 
             <p>
@@ -711,8 +736,6 @@
     </section>
 
 
-    <!-- ERROR MESSAGE -->
-
     {% if error %}
 
     <div class="error">
@@ -724,8 +747,6 @@
 
     {% if results %}
 
-
-    <!-- SEQUENCE SUMMARY -->
 
     <section class="panel summary-panel">
 
@@ -760,7 +781,7 @@
 
             <div class="stat">
                 <strong>{{ results.N }}</strong>
-                <span>Ambiguous (N)</span>
+                <span>Unknown base (N)</span>
             </div>
 
             <div class="stat">
@@ -769,6 +790,53 @@
             </div>
 
         </div>
+
+
+        <div class="ambiguity-panel">
+
+            <h3>IUPAC Ambiguous Nucleotide Composition</h3>
+
+            <p class="muted">
+                Ambiguous nucleotide symbols represent positions
+                that may contain more than one possible nucleotide.
+            </p>
+
+            <div class="ambiguity-grid">
+
+                {% for code, count in results.ambiguous_bases.items() %}
+
+                <div class="ambiguity-card">
+                    <strong>{{ count }}</strong>
+                    <span>{{ code }}</span>
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="ambiguity-summary">
+
+                <div class="ambiguity-total">
+                    <span>Total ambiguous positions</span>
+                    <strong>{{ results.ambiguous_count }}</strong>
+                </div>
+
+                <div class="ambiguity-total">
+                    <span>Known nucleotide positions</span>
+                    <strong>{{ results.sequence_length - results.ambiguous_count }}</strong>
+                </div>
+
+            </div>
+
+            <div class="ambiguity-note">
+                <strong>GC content interpretation:</strong>
+                GC content is calculated using only the definite
+                A, T, G and C positions. Ambiguous positions are
+                excluded from this calculation.
+            </div>
+
+        </div>
+
 
         <h3 style="margin-top:18px;">
             Reverse complement
@@ -794,8 +862,6 @@
 
     </section>
 
-
-    <!-- INTERACTIVE ORF MAP -->
 
     <section class="panel orf-panel">
 
@@ -876,8 +942,6 @@
                         aria-label="{{ track.strand }} strand, frame {{ track.frame }}"
                     >
 
-                        <!-- COORDINATE RULER -->
-
                         <line
                             class="coordinate-line"
                             x1="{{ plot_left }}"
@@ -920,8 +984,6 @@
 
                         {% endfor %}
 
-
-                        <!-- ORF BLOCKS -->
 
                         {% for orf in track.orfs %}
 
@@ -1037,8 +1099,6 @@
             nucleotide positions along the original DNA sequence.
         </p>
 
-
-        <!-- INTERACTIVE ORF DETAILS -->
 
         <h3 class="details-heading">
             Interactive ORF Details
@@ -1158,13 +1218,13 @@
         <p class="hint">
             ORFs are computational predictions. Their presence alone
             does not establish that a gene is expressed or has a
-            particular biological function.
+            particular biological function. Ambiguous codons may
+            interrupt ORF detection when they occur in a start or
+            stop codon.
         </p>
 
     </section>
 
-
-    <!-- PREDICTED ORF TABLE -->
 
     <section class="panel table-panel">
 
@@ -1270,8 +1330,6 @@
     </section>
 
 
-    <!-- SIX-FRAME TRANSLATION -->
-
     <section class="panel translation-panel">
 
         <h2>Six-Frame Translation</h2>
@@ -1279,6 +1337,7 @@
         <p class="muted">
             Translations are shown in the order returned by the analysis:
             forward frames 1–3, followed by reverse frames 1–3.
+            Ambiguous codons may translate to X.
         </p>
 
         {% for item in translations %}
@@ -1320,8 +1379,6 @@
 
 <script>
 
-    // Open selected ORF details.
-
     function openOrfDetails(event, detailsId) {
 
         event.preventDefault();
@@ -1332,8 +1389,6 @@
             return;
         }
 
-        // Close other ORF detail panels.
-
         document.querySelectorAll(".orf-details").forEach(function(item) {
 
             if (item.id !== detailsId) {
@@ -1341,8 +1396,6 @@
             }
 
         });
-
-        // Open selected ORF.
 
         selectedDetails.open = true;
 

@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>OmicsBridge | Multi-Omics Integration</title>
+    <title>OmicsHelixa | Multi-Omics Integration</title>
 
     <style>
         * {
@@ -247,6 +248,44 @@
             color: #64748b;
         }
 
+        .ambiguity-card {
+            background: #eff6ff;
+            padding: 15px;
+            text-align: center;
+            border-radius: 9px;
+            border: 1px solid #dbeafe;
+        }
+
+        .ambiguity-card strong {
+            display: block;
+            font-size: 22px;
+            color: #1d4ed8;
+            margin-bottom: 5px;
+        }
+
+        .ambiguity-card span {
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .ambiguity-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 15px;
+            margin-top: 18px;
+        }
+
+        .ambiguity-note {
+            background: #f8fafc;
+            border-left: 5px solid #0891b2;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 18px;
+            color: #475569;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
         .workflow {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -304,7 +343,7 @@
 <body>
 
 <nav>
-    <h2>🧬 OmicsBridge</h2>
+    <h2>🧬 OmicsHelixa</h2>
 
     <div>
         <a href="/">Home</a>
@@ -333,9 +372,10 @@
 
         <p class="description">
             Enter a DNA coding-strand sequence or upload
-            a FASTA file. OmicsBridge will calculate DNA
+            a FASTA file. OmicsHelixa will calculate DNA
             composition, generate the corresponding mRNA
             and translate the sequence into a protein.
+            Standard DNA IUPAC ambiguity codes are supported.
         </p>
 
         {% if error %}
@@ -354,7 +394,7 @@
 
             <textarea
                 name="sequence"
-                placeholder="Paste your DNA sequence here (A, T, G, C, N)..."
+                placeholder="Paste DNA sequence (A, T, G, C, R, Y, S, W, K, M, B, D, H, V, N)..."
             >{{ sequence_input or '' }}</textarea>
 
             <label><strong>Or upload a FASTA file</strong></label>
@@ -457,6 +497,53 @@
 
         </div>
 
+        <div class="sequence-box">
+
+            <h3>IUPAC Ambiguous Nucleotide Composition</h3>
+
+            <p class="description">
+                These symbols represent nucleotide positions
+                where the exact DNA base is uncertain or where
+                multiple possible bases are represented.
+            </p>
+
+            <div class="composition-grid">
+
+                {% for code, count in results.ambiguous_bases.items() %}
+
+                <div class="ambiguity-card">
+                    <strong>{{ count }}</strong>
+                    <span>{{ code }}</span>
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="ambiguity-summary">
+
+                <div class="stat-card">
+                    <h4>Total Ambiguous Positions</h4>
+                    <strong>{{ results.ambiguous_count }}</strong>
+                </div>
+
+                <div class="stat-card">
+                    <h4>Known Nucleotide Positions</h4>
+                    <strong>{{ results.known_bases }}</strong>
+                </div>
+
+            </div>
+
+            <div class="ambiguity-note">
+                <strong>Interpretation:</strong>
+                GC content is calculated using only the
+                unambiguous A, T, G and C positions.
+                Ambiguous positions are excluded from the
+                GC percentage calculation.
+            </div>
+
+        </div>
+
     </section>
 
     <section class="panel">
@@ -466,6 +553,7 @@
         <p class="description">
             The coding DNA strand is converted into its
             corresponding RNA sequence by replacing T with U.
+            IUPAC ambiguity symbols are preserved.
         </p>
 
         <div class="sequence-box rna">
@@ -511,7 +599,7 @@
             >
                 <input
                     type="hidden"
-                    name="sequence"
+                    name="protein_sequence"
                     value="{{ results.protein_sequence }}"
                 >
 
@@ -558,6 +646,14 @@
 
         </div>
 
+        <div class="ambiguity-note">
+            <strong>Translation note:</strong>
+            X represents an amino acid that cannot be
+            determined unambiguously from the nucleotide
+            codon. A * represents a stop codon and is
+            not an amino acid residue.
+        </div>
+
     </section>
 
     {% endif %}
@@ -595,7 +691,7 @@
 </main>
 
 <footer>
-    OmicsBridge | Genomics • Transcriptomics • Omics Integration
+    OmicsHelixa | Genomics • Transcriptomics • Omics Integration
     <br><br>
     Computational exploration of biological systems
 </footer>

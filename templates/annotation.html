@@ -4,651 +4,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>NCBI Protein Annotation | OmicsBridge</title>
+    <title>NCBI Annotation | OmicsHelixa</title>
 
     <style>
         :root {
-            --background: #061c17;
-            --background-light: #0b2b22;
-            --surface: #10372b;
-            --surface-light: #174536;
-            --green: #37c78a;
-            --green-light: #8ce8b6;
-            --gold: #ffc857;
-            --text: #e9f7ef;
-            --muted: #a8c5b6;
-            --border: rgba(173, 220, 190, 0.16);
-            --red: #f07171;
-            --blue: #61b8f2;
-            --purple: #b99af5;
-            --orange: #f2a65a;
+            --bg: #f4f7fb;
+            --surface: #ffffff;
+            --text: #172033;
+            --muted: #667085;
+            --primary: #2457c5;
+            --primary-light: #eaf0ff;
+            --border: #e2e8f0;
+            --success: #16845b;
+            --success-bg: #e8f5ef;
+            --danger: #c0392b;
+            --danger-bg: #fff0ef;
+            --warning: #936b16;
+            --warning-bg: #fff8e7;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background:
-                radial-gradient(circle at 85% 5%, #164a37 0, transparent 28%),
-                radial-gradient(circle at 5% 40%, #10372a 0, transparent 30%),
-                var(--background);
+            background: var(--bg);
             color: var(--text);
-            line-height: 1.6;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         header {
-            padding: 35px 6%;
-            background:
-                linear-gradient(115deg, rgba(5, 32, 23, 0.98), rgba(12, 66, 43, 0.94)),
-                var(--background-light);
-            border-bottom: 1px solid var(--border);
+            background: #102344;
+            color: white;
+            padding: 22px 6%;
         }
 
-        .header-inner {
-            max-width: 1400px;
-            margin: auto;
-        }
-
-        .brand {
-            color: var(--green-light);
-            font-size: 14px;
-            font-weight: bold;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-
-        header h1 {
-            font-size: clamp(30px, 5vw, 48px);
-            margin: 10px 0 5px;
-            line-height: 1.15;
-        }
+        header h1 { margin: 0; font-size: 25px; }
 
         header p {
-            color: var(--muted);
-            margin: 0;
+            margin: 8px 0 0;
+            color: #cbd5e1;
         }
 
         nav {
-            background: rgba(8, 37, 28, 0.96);
-            padding: 15px 6%;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            backdrop-filter: blur(12px);
-        }
-
-        .nav-inner {
-            max-width: 1400px;
-            margin: auto;
             display: flex;
             flex-wrap: wrap;
-            gap: 12px 25px;
+            gap: 18px;
+            padding: 15px 6%;
+            background: white;
+            border-bottom: 1px solid var(--border);
         }
 
         nav a {
-            color: #c5e7d4;
+            color: var(--primary);
             text-decoration: none;
-            font-size: 14px;
-            font-weight: bold;
-            transition: color 0.2s;
-        }
-
-        nav a:hover,
-        nav a.active {
-            color: var(--green-light);
+            font-weight: 600;
         }
 
         main {
-            max-width: 1400px;
-            margin: 35px auto;
-            padding: 0 24px;
+            width: min(1200px, 92%);
+            margin: 30px auto;
+        }
+
+        .intro { margin-bottom: 24px; }
+
+        .intro h2 { margin-bottom: 8px; }
+
+        .intro p {
+            color: var(--muted);
+            line-height: 1.6;
         }
 
         .panel {
-            background: linear-gradient(145deg, #10382b, #0b2b22);
+            background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 28px;
-            margin-bottom: 26px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
-        }
-
-        .panel h2 {
-            font-size: 23px;
-            margin: 0 0 12px;
-            color: #f0fff5;
-        }
-
-        .panel h3 {
-            color: var(--green-light);
-            margin-top: 25px;
-        }
-
-        .section-number {
-            color: var(--green);
-            font-size: 13px;
-            letter-spacing: 2px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        .muted {
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .info {
-            background: rgba(57, 158, 112, 0.12);
-            border: 1px solid rgba(93, 203, 143, 0.25);
             border-radius: 12px;
-            padding: 16px;
-            margin: 18px 0;
-            color: #d5f4df;
+            padding: 22px;
+            margin-bottom: 22px;
+            box-shadow: 0 3px 12px rgba(20, 40, 80, 0.04);
         }
 
-        .success {
-            background: rgba(47, 165, 105, 0.12);
-            border: 1px solid rgba(82, 211, 143, 0.45);
-            border-left: 5px solid var(--green);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 18px 0;
+        .panel h3 { margin-top: 0; }
+
+        .mode-switch {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 22px;
         }
 
-        .warning {
-            background: rgba(214, 155, 25, 0.10);
-            border: 1px solid rgba(255, 200, 87, 0.3);
-            border-left: 5px solid var(--gold);
-            border-radius: 12px;
-            padding: 18px;
-            margin: 18px 0;
+        .mode-switch button {
+            border: 1px solid var(--border);
+            background: white;
+            padding: 11px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text);
         }
 
-        .error {
-            background: rgba(220, 65, 65, 0.12);
-            border: 1px solid rgba(240, 113, 113, 0.4);
-            border-radius: 10px;
-            padding: 15px;
-            color: #ffb6b6;
-            margin: 18px 0;
+        .mode-switch button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
         label {
             display: block;
-            margin: 18px 0 8px;
-            font-weight: bold;
-            color: #d8f2e2;
+            margin: 13px 0 7px;
+            font-weight: 600;
         }
 
-        input,
+        input[type="text"],
         textarea {
-            display: block;
             width: 100%;
-            background: #071f18;
-            color: white;
-            border: 1px solid #356b51;
-            border-radius: 9px;
-            padding: 13px;
-            font-family: inherit;
-            font-size: 14px;
-        }
-
-        input:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--green);
-            box-shadow: 0 0 0 3px rgba(55, 199, 138, 0.12);
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 15px;
         }
 
         textarea {
-            min-height: 170px;
+            min-height: 145px;
             resize: vertical;
-            font-family: Consolas, monospace;
-            line-height: 1.6;
         }
 
-        button {
-            background: linear-gradient(135deg, #27a96e, #168352);
-            color: white;
+        input:focus, textarea:focus {
+            outline: 2px solid #b9ccff;
+            border-color: var(--primary);
+        }
+
+        .help {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .primary-button {
+            margin-top: 16px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 9px;
-            padding: 14px 24px;
-            margin-top: 18px;
-            font-size: 14px;
-            font-weight: bold;
+            border-radius: 7px;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, filter 0.2s;
         }
 
-        button:hover {
-            filter: brightness(1.13);
-            transform: translateY(-2px);
+        .primary-button:hover { background: #19449f; }
+
+        .error {
+            padding: 14px;
+            border-radius: 8px;
+            background: var(--danger-bg);
+            border: 1px solid #ffd0cb;
+            color: var(--danger);
+            margin-bottom: 18px;
         }
 
-        .stats {
+        .summary-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 14px;
-            margin-top: 20px;
+            margin: 18px 0;
         }
 
         .stat {
-            background: rgba(4, 26, 19, 0.58);
+            padding: 17px;
             border: 1px solid var(--border);
-            padding: 18px;
-            border-radius: 12px;
+            background: #f9fbff;
+            border-radius: 9px;
+        }
+
+        .stat span {
+            display: block;
             color: var(--muted);
             font-size: 13px;
+            margin-bottom: 8px;
         }
 
-        .stat strong {
-            display: block;
-            color: var(--green-light);
-            font-size: 22px;
-            margin-top: 7px;
-            overflow-wrap: anywhere;
-            line-height: 1.3;
-        }
+        .stat strong { font-size: 23px; }
 
-        .table-wrap {
-            overflow-x: auto;
-            margin-top: 18px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-        }
+        .table-wrapper { overflow-x: auto; }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 700px;
+            min-width: 850px;
         }
 
-        th,
-        td {
+        th, td {
             text-align: left;
-            padding: 13px;
+            padding: 12px;
             border-bottom: 1px solid var(--border);
-            font-size: 13px;
             vertical-align: top;
+            font-size: 14px;
         }
 
         th {
-            background: #174535;
-            color: #d9f4e3;
-            white-space: nowrap;
+            background: #f1f5fb;
+            font-weight: 700;
         }
 
-        td {
-            color: #d2e7da;
+        td { line-height: 1.5; }
+
+        .badge {
+            display: inline-block;
+            background: var(--success-bg);
+            color: var(--success);
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
         }
 
-        tr:hover td {
-            background: rgba(91, 180, 125, 0.07);
+        .badge-warning {
+            background: var(--warning-bg);
+            color: var(--warning);
         }
 
-        .quality {
-            font-weight: bold;
-            color: var(--green-light);
+        .note {
+            background: var(--warning-bg);
+            border: 1px solid #f5dfaa;
+            padding: 14px;
+            border-radius: 8px;
+            color: #765719;
+            line-height: 1.6;
+            margin-top: 16px;
         }
 
-        .interpretation {
-            line-height: 1.8;
+        .info-note {
+            background: #eef4ff;
+            border: 1px solid #cfddff;
+            padding: 14px;
+            border-radius: 8px;
+            color: #24477e;
+            line-height: 1.6;
+            margin-top: 16px;
         }
 
-        /* =================================
-           SIX-FRAME ORF MAP
-        ================================= */
-
-        .orf-map {
-            background:
-                radial-gradient(circle at 80% 15%, rgba(44, 137, 91, 0.15), transparent 30%),
-                #061d16;
-            border: 1px solid rgba(112, 207, 148, 0.25);
-            border-radius: 16px;
-            padding: 22px;
-            margin-top: 22px;
-            overflow: hidden;
+        .reason-list {
+            margin: 0;
+            padding-left: 18px;
         }
 
-        .map-heading {
+        .reason-list li { margin-bottom: 4px; }
+
+        .pagination {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-top: 20px;
         }
 
-        .map-heading h3 {
-            margin: 0;
-            font-size: 20px;
-            color: #e8fff0;
+        .pagination a {
+            padding: 10px 15px;
+            border-radius: 7px;
+            background: var(--primary-light);
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
         }
 
-        .map-badge {
-            background: rgba(55, 199, 138, 0.14);
-            color: var(--green-light);
-            border: 1px solid rgba(55, 199, 138, 0.3);
-            padding: 6px 11px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .map-legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 20px;
-            padding: 14px;
-            margin-bottom: 22px;
-            background: rgba(255,255,255,0.025);
-            border-radius: 10px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            color: #c3dccc;
-            font-size: 12px;
-        }
-
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 4px;
-        }
-
-        .legend-gold {
-            background: var(--gold);
-        }
-
-        .frame-plus-1 {
-            --frame-color: #42d392;
-        }
-
-        .frame-plus-2 {
-            --frame-color: #56b5ed;
-        }
-
-        .frame-plus-3 {
-            --frame-color: #b293f0;
-        }
-
-        .frame-minus-1 {
-            --frame-color: #f3ad5d;
-        }
-
-        .frame-minus-2 {
-            --frame-color: #5ed1cb;
-        }
-
-        .frame-minus-3 {
-            --frame-color: #ec7777;
-        }
-
-        .legend-dot.frame-plus-1,
-        .legend-dot.frame-plus-2,
-        .legend-dot.frame-plus-3,
-        .legend-dot.frame-minus-1,
-        .legend-dot.frame-minus-2,
-        .legend-dot.frame-minus-3 {
-            background: var(--frame-color);
-        }
-
-        .map-scroll {
-            overflow-x: auto;
-            padding-bottom: 12px;
-        }
-
-        .map-inner {
-            min-width: 720px;
-        }
-
-        .coordinate-heading {
-            display: grid;
-            grid-template-columns: 85px 1fr;
-            gap: 14px;
-            margin-bottom: 8px;
-        }
-
-        .coordinate-label {
-            font-size: 12px;
-            color: var(--muted);
-            display: flex;
-            align-items: end;
-        }
-
-        .ruler {
-            height: 38px;
-            position: relative;
-            border-bottom: 1px solid #527b63;
-            margin-right: 5px;
-        }
-
-        .ruler-tick {
-            position: absolute;
-            bottom: -1px;
-            height: 8px;
-            border-left: 1px solid #8bb79b;
-        }
-
-        .ruler-tick span {
-            position: absolute;
-            bottom: 11px;
-            left: 0;
-            transform: translateX(-50%);
-            font-size: 11px;
-            color: #b4d3bf;
-            white-space: nowrap;
-        }
-
-        .ruler-tick.first span {
-            transform: none;
-        }
-
-        .ruler-tick.last span {
-            transform: translateX(-100%);
-        }
-
-        .track-row {
-            display: grid;
-            grid-template-columns: 85px 1fr;
-            gap: 14px;
-            margin: 13px 0;
-            align-items: stretch;
-        }
-
-        .track-label {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 9px;
-            background: rgba(255,255,255,0.045);
-            border: 1px solid var(--border);
-            min-height: 58px;
-        }
-
-        .track-label strong {
-            font-size: 19px;
-            color: var(--frame-color);
-        }
-
-        .track-label span {
-            color: #9bb9a7;
-            font-size: 10px;
-        }
-
-        .track-area {
-            position: relative;
-            min-height: 58px;
-            border-radius: 9px;
-            border: 1px solid rgba(124, 180, 139, 0.18);
-            background:
-                repeating-linear-gradient(
-                    to right,
-                    transparent 0,
-                    transparent calc(25% - 1px),
-                    rgba(151, 203, 163, 0.12) calc(25% - 1px),
-                    rgba(151, 203, 163, 0.12) 25%
-                ),
-                rgba(255,255,255,0.025);
-        }
-
-        .track-area::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 50%;
-            border-top: 1px dashed rgba(157, 205, 168, 0.16);
-        }
-
-        .orf-block {
-            position: absolute;
-            height: 21px;
-            min-width: 5px;
-            border-radius: 5px;
-            background: var(--frame-color);
-            color: #062318;
-            top: calc(8px + (var(--lane, 0) * 26px));
-            left: var(--orf-left, 0%);
-            width: var(--orf-width, 5px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 10px;
-            font-weight: 900;
-            white-space: nowrap;
-            overflow: visible;
-            z-index: 2;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.28);
-            cursor: help;
-        }
-
-        .orf-block::after {
-            content: "";
-            position: absolute;
-            right: -1px;
-            top: 5px;
-            width: 0;
-            height: 0;
-            border-top: 5px solid transparent;
-            border-bottom: 5px solid transparent;
-            border-left: 7px solid #062318;
-        }
-
-        .orf-block.reverse::after {
-            right: auto;
-            left: -1px;
-            border-left: none;
-            border-right: 7px solid #062318;
-        }
-
-        .orf-block.best {
-            background: var(--gold);
-            color: #392400;
-            outline: 2px solid #fff0b5;
-            box-shadow: 0 0 14px rgba(255, 200, 87, 0.65);
-            z-index: 5;
-        }
-
-        .orf-block.best::after {
-            border-left-color: #392400;
-        }
-
-        .orf-block.best.reverse::after {
-            border-right-color: #392400;
-        }
-
-        .map-caption {
-            color: #a7c5b2;
-            font-size: 12px;
-            margin-top: 15px;
-            line-height: 1.7;
-        }
-
-        .best-key {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            color: #ffe2a0;
-            font-weight: bold;
-        }
-
-        .best-key::before {
-            content: "";
-            width: 12px;
-            height: 12px;
-            background: var(--gold);
-            border-radius: 3px;
-        }
-
-        .track-empty {
-            color: #698b77;
-            font-size: 11px;
-            position: absolute;
-            left: 12px;
-            top: 18px;
-        }
-
-        .protein-sequence {
-            padding: 15px;
-            border-radius: 9px;
-            background: #061e17;
-            border: 1px solid var(--border);
-            color: #a7e9c2;
-            font-family: Consolas, monospace;
-            overflow-wrap: anywhere;
-            font-size: 13px;
+        .pagination a.disabled {
+            pointer-events: none;
+            opacity: 0.4;
         }
 
         footer {
             text-align: center;
-            color: #89a997;
-            padding: 30px 15px;
-            border-top: 1px solid var(--border);
-            font-size: 13px;
+            color: var(--muted);
+            padding: 25px;
         }
 
-        @media (max-width: 650px) {
-            header {
-                padding: 28px 20px;
-            }
+        [hidden] { display: none !important; }
 
-            nav {
-                padding: 14px 20px;
-                position: static;
-            }
+        @media (max-width: 600px) {
+            header { padding: 20px 5%; }
 
             main {
-                padding: 0 13px;
+                width: 94%;
                 margin: 20px auto;
             }
 
-            .panel {
-                padding: 19px;
-                border-radius: 13px;
-            }
-
-            .orf-map {
-                padding: 14px;
-            }
-
-            .stats {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
-            .stat strong {
-                font-size: 18px;
-            }
+            .panel { padding: 15px; }
         }
     </style>
 </head>
@@ -656,936 +296,535 @@
 <body>
 
 <header>
-    <div class="header-inner">
-        <div class="brand">OmicsBridge | Bioinformatics Workspace</div>
-        <h1>NCBI Protein Annotation</h1>
-        <p>Six-frame ORF discovery, protein alignment and biological interpretation</p>
-    </div>
+    <h1>OmicsHelixa</h1>
+    <p>NCBI Genome Annotation and Protein Comparison</p>
 </header>
 
 <nav>
-    <div class="nav-inner">
-        <a href="/">Home</a>
-        <a href="/genomics">Genomics</a>
-        <a href="/transcriptomics">Transcriptomics</a>
-        <a href="/integration">Omics Integration</a>
-        <a href="/annotation" class="active">NCBI Annotation</a>
-    </div>
+    <a href="/">Home</a>
+    <a href="/genomics">Genomics</a>
+    <a href="/transcriptomics">Transcriptomics</a>
+    <a href="/integration">Omics Integration</a>
+    <a href="/annotation">NCBI Annotation</a>
 </nav>
 
 <main>
 
-    <!-- INPUT FORM -->
-
-    <section class="panel">
-
-        <div class="section-number">Analysis workspace</div>
-        <h2>Retrieve and compare annotated proteins</h2>
-
-        <p class="muted">
-            Submit a DNA sequence and an NCBI accession to predict
-            open reading frames and compare their translated proteins
-            with annotated reference proteins.
+    <section class="intro">
+        <h2>NCBI Annotation Workspace</h2>
+        <p>
+            Explore annotated nucleotide records, inspect coding sequences,
+            and compare predicted open reading frames against existing
+            NCBI protein annotations.
         </p>
-
-        <div class="info">
-            <strong>Analysis pipeline:</strong>
-            DNA validation → Six-frame ORF prediction →
-            Genomic overlap analysis → NCBI retrieval →
-            Protein alignment → Biological interpretation.
-        </div>
-
-        {% if error %}
-            <div class="error">
-                <strong>Analysis error:</strong> {{ error }}
-            </div>
-        {% endif %}
-
-        <form method="POST" action="/annotation">
-
-            <label for="accession">NCBI accession number</label>
-
-            <input
-                type="text"
-                id="accession"
-                name="accession"
-                value="{{ accession }}"
-                placeholder="Example: U91966.1"
-                required
-            >
-
-            <label for="sequence">DNA sequence (FASTA or raw DNA)</label>
-
-            <textarea
-                id="sequence"
-                name="sequence"
-                placeholder="Paste your DNA sequence here..."
-                required
-            >{{ sequence_input }}</textarea>
-
-            <button type="submit">
-                Analyse and Retrieve NCBI Proteins
-            </button>
-
-        </form>
-
     </section>
 
-
-    {% if results %}
-
-    <!-- NCBI RECORD SUMMARY -->
-
-    <section class="panel">
-
-        <div class="section-number">01 | Reference record</div>
-        <h2>NCBI Reference Record</h2>
-
-        <div class="stats">
-
-            <div class="stat">
-                NCBI accession
-                <strong>{{ results.accession }}</strong>
-            </div>
-
-            <div class="stat">
-                Organism
-                <strong>{{ results.organism }}</strong>
-            </div>
-
-            <div class="stat">
-                Record length
-                <strong>{{ "{:,}".format(results.record_length) }} bp</strong>
-            </div>
-
-            <div class="stat">
-                Annotated proteins
-                <strong>{{ results.annotated_protein_count }}</strong>
-            </div>
-
-            <div class="stat">
-                Predicted ORFs
-                <strong>{{ predicted_orf_count }}</strong>
-            </div>
-
-        </div>
-
-        <p class="muted">{{ results.description }}</p>
-
-    </section>
-
-
-    <!-- SIX-FRAME ORF MAP -->
-
-    <section class="panel">
-
-        <div class="section-number">02 | Genomic visualization</div>
-        <h2>Six-Frame ORF Finder</h2>
-
-        <p class="muted">
-            Predicted ORFs are positioned according to their genomic
-            coordinates across all six reading frames.
-        </p>
-
-        <div class="orf-map">
-
-            <div class="map-heading">
-
-                <h3>Genomic ORF architecture</h3>
-
-                <span class="map-badge">
-                    {{ sequence_length | string }} bp sequence
-                </span>
-
-            </div>
-
-            <div class="map-legend">
-
-                <div class="legend-item">
-                    <span class="legend-dot frame-plus-1"></span>
-                    +1
-                </div>
-
-                <div class="legend-item">
-                    <span class="legend-dot frame-plus-2"></span>
-                    +2
-                </div>
-
-                <div class="legend-item">
-                    <span class="legend-dot frame-plus-3"></span>
-                    +3
-                </div>
-
-                <div class="legend-item">
-                    <span class="legend-dot frame-minus-1"></span>
-                    −1
-                </div>
-
-                <div class="legend-item">
-                    <span class="legend-dot frame-minus-2"></span>
-                    −2
-                </div>
-
-                <div class="legend-item">
-                    <span class="legend-dot frame-minus-3"></span>
-                    −3
-                </div>
-
-                <div class="legend-item">
-                    <span class="legend-dot legend-gold"></span>
-                    Best NCBI match
-                </div>
-
-            </div>
-
-            {% if sequence_length > 0 %}
-
-            <div class="map-scroll">
-
-                <div class="map-inner">
-
-                    <!-- GENOMIC COORDINATE RULER -->
-
-                    <div class="coordinate-heading">
-
-                        <div class="coordinate-label">
-                            Coordinate
-                        </div>
-
-                        <div class="ruler">
-
-                            {% set ruler_ticks = [
-                                1,
-                                (sequence_length * 0.25)|round|int,
-                                (sequence_length * 0.50)|round|int,
-                                (sequence_length * 0.75)|round|int,
-                                sequence_length
-                            ] %}
-
-                            {% for tick in ruler_ticks | unique %}
-
-                                <div
-                                    class="ruler-tick {% if loop.first %}first{% endif %} {% if loop.last %}last{% endif %}"
-                                    data-position="{{ ((tick - 1) / sequence_length * 100) }}"
-                                >
-                                    <span>{{ "{:,}".format(tick) }}</span>
-                                </div>
-
-                            {% endfor %}
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- SIX READING FRAME TRACKS -->
-
-                    {% for track in orf_tracks %}
-
-                        {% set frame_class = ("frame-plus-" if track.strand == "+" else "frame-minus-") ~ track.frame %}
-
-                        <div class="track-row">
-
-                            <div class="track-label {{ frame_class }}">
-
-                                <strong>
-                                    {{ track.strand }}{{ track.frame }}
-                                </strong>
-
-                                <span>
-                                    {% if track.strand == "+" %}
-                                        Forward
-                                    {% else %}
-                                        Reverse
-                                    {% endif %}
-                                </span>
-
-                            </div>
-
-                            <div
-                                class="track-area {{ frame_class }}"
-                                data-height="{{ track.lane_count * 26 + 16 }}"
-                            >
-
-                                {% if track.orfs %}
-
-                                    {% for orf in track.orfs %}
-
-                                        <div
-                                            class="orf-block
-                                                {% if orf.strand == '-' %}reverse{% endif %}
-                                                {% if orf.number == best_orf_number %}best{% endif %}"
-                                            data-lane="{{ orf.lane }}"
-                                            data-left="{{ ((orf.start - 1) / sequence_length * 100) }}"
-                                            data-width="{{ ((orf.end - orf.start + 1) / sequence_length * 100) }}"
-                                            title="ORF {{ orf.number }} | {{ orf.strand }} strand | Frame {{ orf.frame }} | Coordinates {{ orf.start }}–{{ orf.end }} | {{ orf.length }} amino acids"
-                                        >
-                                            {{ orf.number }}
-                                        </div>
-
-                                    {% endfor %}
-
-                                {% else %}
-
-                                    <span class="track-empty">
-                                        No ORFs detected in this reading frame
-                                    </span>
-
-                                {% endif %}
-
-                            </div>
-
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-            </div>
-
-            <div class="map-caption">
-
-                <span class="best-key">Gold</span>
-                identifies the ORF selected as the strongest NCBI protein
-                match. Each numbered block represents a predicted ORF.
-
-                Forward-strand ORFs point towards increasing genomic
-                coordinates. Reverse-strand ORFs point towards decreasing
-                genomic coordinates.
-
-                The genomic coordinate ruler is shared by all six tracks.
-
-            </div>
-
-            {% endif %}
-
-        </div>
-
-        <div class="info">
-
-            <strong>How to read this map:</strong>
-
-            <ul>
-                <li>
-                    The top three tracks represent the forward DNA strand.
-                </li>
-
-                <li>
-                    The bottom three tracks represent the reverse-complement
-                    strand.
-                </li>
-
-                <li>
-                    Each track represents one reading frame.
-                </li>
-
-                <li>
-                    ORF block positions correspond to their genomic
-                    start and end coordinates.
-                </li>
-
-                <li>
-                    ORFs on the same track are separated vertically
-                    into lanes when their intervals overlap.
-                </li>
-
-            </ul>
-
-        </div>
-
-    </section>
-
-
-    <!-- BEST MATCH DASHBOARD -->
-
-    <section class="panel">
-
-        <div class="section-number">03 | Best protein match</div>
-        <h2>Biological Interpretation Dashboard</h2>
-
-        {% set best = namespace(item=none) %}
-
-        {% for item in results.matches %}
-
-            {% if best.item is none %}
-
-                {% set best.item = item %}
-
-            {% elif [item.match.query_coverage, item.match.reference_coverage] | min > [best.item.match.query_coverage, best.item.match.reference_coverage] | min %}
-
-                {% set best.item = item %}
-
-            {% elif [item.match.query_coverage, item.match.reference_coverage] | min == [best.item.match.query_coverage, best.item.match.reference_coverage] | min
-                  and item.match.identity > best.item.match.identity %}
-
-                {% set best.item = item %}
-
-            {% elif [item.match.query_coverage, item.match.reference_coverage] | min == [best.item.match.query_coverage, best.item.match.reference_coverage] | min
-                  and item.match.identity == best.item.match.identity
-                  and item.match.alignment_score > best.item.match.alignment_score %}
-
-                {% set best.item = item %}
-
-            {% endif %}
-
-        {% endfor %}
-
-
-        {% if best.item %}
-
-            {% if best.item.match.identity >= 90
-                  and best.item.match.query_coverage >= 90
-                  and best.item.match.reference_coverage >= 90 %}
-
-                <div class="success">
-
-                    <h3>Strong full-length protein similarity detected</h3>
-
-                    <p>
-                        The strongest candidate has high sequence identity,
-                        high query coverage and high reference coverage.
-                    </p>
-
-            {% else %}
-
-                <div class="warning">
-
-                    <h3>No strong full-length match identified</h3>
-
-                    <p>
-                        The strongest candidate did not meet all three
-                        thresholds: 90% identity, 90% query coverage
-                        and 90% reference coverage.
-                    </p>
-
-            {% endif %}
-
-                <div class="stats">
-
-                    <div class="stat">
-                        Best candidate ORF
-                        <strong>{{ best.item.orf_number }}</strong>
-                    </div>
-
-                    <div class="stat">
-                        Protein identity
-                        <strong>{{ best.item.match.identity }}%</strong>
-                    </div>
-
-                    <div class="stat">
-                        Query coverage
-                        <strong>{{ best.item.match.query_coverage }}%</strong>
-                    </div>
-
-                    <div class="stat">
-                        Reference coverage
-                        <strong>{{ best.item.match.reference_coverage }}%</strong>
-                    </div>
-
-                    <div class="stat">
-                        ORF length
-                        <strong>{{ best.item.orf_length }} aa</strong>
-                    </div>
-
-                </div>
-
-                <h3>Reference protein information</h3>
-
-                <p>
-                    <strong>Gene:</strong>
-                    {{ best.item.match.gene }}
-                </p>
-
-                <p>
-                    <strong>Protein product:</strong>
-                    {{ best.item.match.product }}
-                </p>
-
-                <p>
-                    <strong>Protein accession:</strong>
-                    {{ best.item.match.protein_id }}
-                </p>
-
-                <h3>Genomic context</h3>
-
-                <p>
-                    <strong>Strand:</strong>
-                    {{ best.item.orf_strand }}
-                </p>
-
-                <p>
-                    <strong>Reading frame:</strong>
-                    {{ best.item.orf_frame }}
-                </p>
-
-                <p>
-                    <strong>Coordinates:</strong>
-                    {{ best.item.orf_start }}–{{ best.item.orf_end }}
-                </p>
-
-                <p>
-                    <strong>Overlap status:</strong>
-                    {{ best.item.overlap_status }}
-                </p>
-
-            </div>
-
-        {% else %}
-
-            <div class="warning">
-                No protein matches were generated for interpretation.
-            </div>
-
-        {% endif %}
-
-    </section>
-
-
-    <!-- PROTEIN MATCH QUALITY -->
-
-    <section class="panel">
-
-        <div class="section-number">04 | Alignment assessment</div>
-        <h2>Protein Match Quality Assessment</h2>
-
-        <p class="muted">
-            Candidate matches are evaluated using sequence identity,
-            query coverage and reference coverage.
-        </p>
-
-        <div class="table-wrap">
-
-            <table>
-
-                <thead>
-                    <tr>
-                        <th>ORF</th>
-                        <th>Identity</th>
-                        <th>Query coverage</th>
-                        <th>Reference coverage</th>
-                        <th>Classification</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    {% for item in results.matches %}
-
-                    <tr>
-
-                        <td>{{ item.orf_number }}</td>
-
-                        <td>{{ item.match.identity }}%</td>
-
-                        <td>{{ item.match.query_coverage }}%</td>
-
-                        <td>{{ item.match.reference_coverage }}%</td>
-
-                        <td class="quality">
-
-                            {% if item.match.identity >= 90
-                                  and item.match.query_coverage >= 90
-                                  and item.match.reference_coverage >= 90 %}
-
-                                Strong full-length similarity
-
-                            {% elif item.match.identity >= 70
-                                  and item.match.query_coverage >= 50
-                                  and item.match.reference_coverage >= 50 %}
-
-                                Strong partial similarity
-
-                            {% elif item.match.query_coverage >= 20
-                                  or item.match.reference_coverage >= 20 %}
-
-                                Limited similarity
-
-                            {% else %}
-
-                                Weak or inconclusive similarity
-
-                            {% endif %}
-
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-        <div class="info">
-
-            <strong>Understanding alignment coverage:</strong>
-
-            Query coverage measures the proportion of the predicted
-            protein represented in the alignment.
-
-            Reference coverage measures the proportion of the NCBI
-            reference protein represented in the alignment.
-
-            A short protein fragment can have 100% query coverage
-            while covering only a small part of the reference.
-
-        </div>
-
-    </section>
-
-
-    <!-- ORF OVERLAP ANALYSIS -->
-
-    <section class="panel">
-
-        <div class="section-number">05 | Genomic relationships</div>
-        <h2>ORF Overlap and Genomic Context</h2>
-
-        <p class="muted">
-            Coordinate-based relationships between predicted ORFs
-            that received an NCBI protein comparison.
-        </p>
-
-        <div class="table-wrap">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-                        <th>ORF</th>
-                        <th>Strand</th>
-                        <th>Frame</th>
-                        <th>Coordinates</th>
-                        <th>Length</th>
-                        <th>Overlap status</th>
-                        <th>Contained by</th>
-                        <th>Overlaps with</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {% for item in results.matches %}
-
-                    <tr>
-
-                        <td>{{ item.orf_number }}</td>
-
-                        <td>{{ item.orf_strand }}</td>
-
-                        <td>{{ item.orf_frame }}</td>
-
-                        <td>
-                            {{ item.orf_start }}–{{ item.orf_end }}
-                        </td>
-
-                        <td>{{ item.orf_length }} aa</td>
-
-                        <td>{{ item.overlap_status }}</td>
-
-                        <td>
-                            {% if item.nested_in %}
-                                {{ item.nested_in | join(", ") }}
-                            {% else %}
-                                None
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            {% if item.overlaps_with %}
-                                {{ item.overlaps_with | join(", ") }}
-                            {% else %}
-                                None
-                            {% endif %}
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-        <div class="warning">
-
-            <strong>Biological interpretation:</strong>
-
-            Coordinate containment and overlap describe the genomic
-            arrangement of candidate ORFs. They do not establish
-            whether the candidates are independently expressed or
-            represent separate functional genes.
-
-        </div>
-
-    </section>
-
-
-    <!-- DETAILED ANNOTATION -->
-
-    <section class="panel">
-
-        <div class="section-number">06 | Annotation results</div>
-        <h2>Detailed Protein Annotation Results</h2>
-
-        <div class="table-wrap">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-                        <th>ORF</th>
-                        <th>Strand</th>
-                        <th>Frame</th>
-                        <th>Length</th>
-                        <th>Gene</th>
-                        <th>Protein product</th>
-                        <th>Identity</th>
-                        <th>Query coverage</th>
-                        <th>Reference coverage</th>
-                        <th>Alignment score</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {% for item in results.matches %}
-
-                    <tr>
-
-                        <td>{{ item.orf_number }}</td>
-
-                        <td>{{ item.orf_strand }}</td>
-
-                        <td>{{ item.orf_frame }}</td>
-
-                        <td>{{ item.orf_length }} aa</td>
-
-                        <td>{{ item.match.gene }}</td>
-
-                        <td>{{ item.match.product }}</td>
-
-                        <td>{{ item.match.identity }}%</td>
-
-                        <td>{{ item.match.query_coverage }}%</td>
-
-                        <td>{{ item.match.reference_coverage }}%</td>
-
-                        <td>{{ item.match.alignment_score }}</td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </section>
-
-
-    <!-- BIOLOGICAL INTERPRETATION -->
-
-    <section class="panel">
-
-        <div class="section-number">07 | Scientific interpretation</div>
-        <h2>Biological Interpretation</h2>
-
-        <div class="interpretation">
-
-            <h3>7.1 Protein sequence similarity</h3>
-
-            <p>
-                Protein sequence identity describes the proportion
-                of aligned amino-acid positions that are identical
-                between the predicted protein and its reference.
-            </p>
-
-            <p>
-                Query coverage describes the proportion of the
-                predicted protein represented in the alignment.
-                Reference coverage describes the proportion of the
-                NCBI reference protein represented in the alignment.
-            </p>
-
-            <h3>7.2 ORF prediction</h3>
-
-            <p>
-                An open reading frame is a stretch of nucleotide
-                sequence that can be translated from a start codon
-                to an in-frame stop codon.
-            </p>
-
-            <p>
-                The OmicsBridge detector identifies candidate ORFs
-                beginning with ATG and ending at an in-frame stop
-                codon. These are computational predictions, not
-                experimentally confirmed genes.
-            </p>
-
-            <h3>7.3 Six reading frames</h3>
-
-            <p>
-                Double-stranded DNA can be examined in six reading
-                frames: three on the forward strand and three on
-                the reverse-complement strand.
-            </p>
-
-            <p>
-                A reading frame determines how nucleotide triplets
-                are grouped into codons. Different frames can
-                produce different translated sequences from the
-                same DNA region.
-            </p>
-
-            <h3>7.4 ORF overlap</h3>
-
-            <p>
-                Multiple ORFs may overlap because of alternative
-                start positions, different reading frames or
-                opposite-strand candidate regions.
-            </p>
-
-            <p>
-                Coordinate overlap alone does not establish
-                independent transcription, translation or
-                biological function.
-            </p>
-
-            <h3>7.5 Biological function</h3>
-
-            <p>
-                When a reference annotation identifies a protein
-                such as the RuBisCO large subunit, its biological
-                role can be investigated using the organism,
-                gene annotation, protein sequence and supporting
-                scientific literature.
-            </p>
-
-            <p>
-                RuBisCO catalyses carbon dioxide fixation in the
-                Calvin-Benson cycle of photosynthesis.
-            </p>
-
-        </div>
-
-        <div class="warning">
-
-            <strong>Scientific limitations</strong>
-
-            <ul>
-
-                <li>
-                    Local pairwise alignment is not equivalent
-                    to an official NCBI BLAST search.
-                </li>
-
-                <li>
-                    High sequence identity alone does not prove
-                    biological function.
-                </li>
-
-                <li>
-                    ORF prediction does not demonstrate gene expression.
-                </li>
-
-                <li>
-                    The current ORF detector uses ATG as its start
-                    codon and a minimum predicted length of 30 amino
-                    acids.
-                </li>
-
-                <li>
-                    Overlap and containment are based on genomic
-                    coordinates and do not prove that candidates
-                    are separate functional genes.
-                </li>
-
-            </ul>
-
-        </div>
-
-    </section>
-
+    <div class="mode-switch">
+        <button type="button"
+                id="proteinModeButton"
+                class="active"
+                onclick="showMode('protein')">
+            Protein Comparison
+        </button>
+
+        <button type="button"
+                id="genomeModeButton"
+                onclick="showMode('genome')">
+            Genome Explorer
+        </button>
+    </div>
+
+    {% if error %}
+    <div class="error">
+        <strong>Analysis error:</strong> {{ error }}
+    </div>
     {% endif %}
+
+    <!-- PROTEIN COMPARISON -->
+
+    <section id="proteinMode">
+
+        <div class="panel">
+            <h3>Compare predicted ORFs with NCBI proteins</h3>
+
+            <form method="POST"
+                  action="/annotation"
+                  enctype="multipart/form-data">
+
+                <input type="hidden"
+                       name="analysis_mode"
+                       value="protein_comparison">
+
+                <label for="protein_accession">NCBI accession</label>
+
+                <input type="text"
+                       id="protein_accession"
+                       name="accession"
+                       value="{{ accession or 'U91966.1' }}"
+                       placeholder="Example: U91966.1"
+                       required>
+
+                <label for="dna_sequence">DNA sequence</label>
+
+                <textarea id="dna_sequence"
+                          name="sequence"
+                          placeholder="Paste your DNA sequence here...">{{ sequence_input or '' }}</textarea>
+
+                <label for="dna_file">Or upload a DNA FASTA file</label>
+
+                <input type="file"
+                       id="dna_file"
+                       name="file"
+                       accept=".fasta,.fa,.fna,.txt">
+
+                <p class="help">
+                    This mode predicts ORFs and compares their translated
+                    protein sequences with annotated proteins in the
+                    selected GenBank record.
+                </p>
+
+                <button class="primary-button" type="submit">
+                    Run Protein Comparison
+                </button>
+            </form>
+        </div>
+
+        {% if results %}
+
+        <!-- REFERENCE RECORD -->
+
+        <div class="panel">
+            <h3>Reference Record</h3>
+
+            <p><strong>Accession:</strong> {{ results.accession }}</p>
+            <p><strong>Organism:</strong> {{ results.organism }}</p>
+            <p><strong>Description:</strong> {{ results.description }}</p>
+            <p><strong>Record length:</strong> {{ results.record_length | int }} bp</p>
+
+            <div class="summary-grid">
+
+                <div class="stat">
+                    <span>Predicted ORFs</span>
+                    <strong>{{ results.predicted_orf_count }}</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Annotated proteins</span>
+                    <strong>{{ results.annotated_protein_count }}</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Candidate matches</span>
+                    <strong>{{ results.candidate_match_count }}</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Filtered alignments</span>
+                    <strong>{{ results.filtered_match_count }}</strong>
+                </div>
+
+                <div class="stat">
+                    <span>ORFs without usable alignment</span>
+                    <strong>{{ results.orfs_without_alignments }}</strong>
+                </div>
+
+            </div>
+
+            <div class="info-note">
+                <strong>How to interpret these results:</strong>
+                Candidate matches passed the current alignment screening
+                criteria. Filtered alignments did not meet one or more
+                criteria. ORFs without usable alignments could not produce
+                a usable protein comparison.
+            </div>
+        </div>
+
+        <!-- SCREENING CRITERIA -->
+
+        <div class="panel">
+            <h3>Protein Comparison Screening Criteria</h3>
+
+            <p>
+                The application currently uses the following minimum
+                thresholds when screening the best alignment for each ORF.
+            </p>
+
+            <div class="summary-grid">
+
+                <div class="stat">
+                    <span>Minimum sequence identity</span>
+                    <strong>30%</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Minimum query coverage</span>
+                    <strong>50%</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Minimum reference coverage</span>
+                    <strong>20%</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Minimum aligned positions</span>
+                    <strong>20</strong>
+                </div>
+
+            </div>
+
+            <div class="note">
+                <strong>Scientific limitation:</strong>
+                These are initial screening thresholds for exploratory
+                comparison. They are not universal biological standards.
+                Passing the thresholds does not establish gene function,
+                biological activity, or definitive homology.
+            </div>
+        </div>
+
+        <!-- CANDIDATE MATCHES -->
+
+        <div class="panel">
+            <h3>Candidate Protein Matches</h3>
+
+            <p class="help">
+                These alignments passed all four screening criteria.
+            </p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ORF</th>
+                            <th>Gene</th>
+                            <th>Product</th>
+                            <th>Protein ID</th>
+                            <th>Identity</th>
+                            <th>Query coverage</th>
+                            <th>Reference coverage</th>
+                            <th>Strand</th>
+                            <th>Frame</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in results.matches %}
+                        <tr>
+                            <td>{{ item.orf_number }}</td>
+                            <td>{{ item.gene }}</td>
+                            <td>{{ item.product }}</td>
+                            <td>{{ item.protein_id }}</td>
+                            <td>{{ item.identity }}%</td>
+                            <td>{{ item.query_coverage }}%</td>
+                            <td>{{ item.reference_coverage }}%</td>
+                            <td>{{ item.orf_strand }}</td>
+                            <td>{{ item.orf_frame }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9">
+                                No candidate protein matches passed the
+                                screening criteria.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="help">
+                Candidate status indicates that an alignment passed
+                computational screening. Further biological validation
+                is required before assigning a function.
+            </p>
+        </div>
+
+        <!-- FILTERED ALIGNMENTS -->
+
+        <div class="panel">
+            <h3>Filtered Protein Alignments</h3>
+
+            <p class="help">
+                These alignments were produced but did not pass one or
+                more screening criteria.
+            </p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ORF</th>
+                            <th>Gene</th>
+                            <th>Product</th>
+                            <th>Protein ID</th>
+                            <th>Identity</th>
+                            <th>Query coverage</th>
+                            <th>Reference coverage</th>
+                            <th>Aligned positions</th>
+                            <th>Strand</th>
+                            <th>Frame</th>
+                            <th>Rejection reasons</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in results.filtered_matches %}
+                        <tr>
+                            <td>{{ item.orf_number }}</td>
+                            <td>{{ item.gene }}</td>
+                            <td>{{ item.product }}</td>
+                            <td>{{ item.protein_id }}</td>
+                            <td>{{ item.identity }}%</td>
+                            <td>{{ item.query_coverage }}%</td>
+                            <td>{{ item.reference_coverage }}%</td>
+                            <td>{{ item.aligned_positions }}</td>
+                            <td>{{ item.orf_strand }}</td>
+                            <td>{{ item.orf_frame }}</td>
+                            <td>
+                                {% if item.rejection_reasons %}
+                                <ul class="reason-list">
+                                    {% for reason in item.rejection_reasons %}
+                                    <li>{{ reason }}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                No rejection reason supplied.
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="11">
+                                No filtered alignments were returned.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% endif %}
+
+    </section>
+
+    <!-- GENOME EXPLORER -->
+
+    <section id="genomeMode" hidden>
+
+        <div class="panel">
+            <h3>Explore an annotated NCBI genome</h3>
+
+            <p>
+                Retrieve a GenBank nucleotide record and browse its
+                existing annotated coding sequences (CDS).
+            </p>
+
+            <form method="GET" action="/annotation">
+
+                <input type="hidden"
+                       name="analysis_mode"
+                       value="genome_explorer">
+
+                <label for="genome_accession">NCBI genome accession</label>
+
+                <input type="text"
+                       id="genome_accession"
+                       name="accession"
+                       value="{{ genome_summary.accession if genome_summary else accession or 'CP002686.1' }}"
+                       placeholder="Example: CP002686.1"
+                       required>
+
+                <label for="genome_search">Search annotated CDS records</label>
+
+                <input type="text"
+                       id="genome_search"
+                       name="search"
+                       value="{{ search_term or '' }}"
+                       placeholder="Search gene, locus tag, product or protein ID">
+
+                <button class="primary-button" type="submit">
+                    Explore Genome
+                </button>
+            </form>
+
+            <p class="help">
+                Large records may take several minutes to retrieve the
+                first time. Subsequent pages should use the server-side
+                cache while the application process remains running.
+            </p>
+        </div>
+
+        {% if genome_summary %}
+
+        <div class="panel">
+            <h3>Genome Record Summary</h3>
+
+            <p><strong>Accession:</strong> {{ genome_summary.accession }}</p>
+            <p><strong>Organism:</strong> {{ genome_summary.organism }}</p>
+            <p><strong>Description:</strong> {{ genome_summary.description }}</p>
+
+            <div class="summary-grid">
+
+                <div class="stat">
+                    <span>Genome length</span>
+                    <strong>{{ "{:,}".format(genome_summary.record_length) }}</strong>
+                    <p class="help">Base pairs</p>
+                </div>
+
+                <div class="stat">
+                    <span>Gene features</span>
+                    <strong>{{ "{:,}".format(genome_summary.gene_feature_count) }}</strong>
+                </div>
+
+                <div class="stat">
+                    <span>mRNA features</span>
+                    <strong>{{ "{:,}".format(genome_summary.mrna_feature_count) }}</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Annotated CDS</span>
+                    <strong>{{ "{:,}".format(genome_summary.cds_count) }}</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Unique gene identifiers</span>
+                    <strong>{{ "{:,}".format(genome_summary.unique_gene_count) }}</strong>
+                </div>
+
+            </div>
+
+            <div class="note">
+                <strong>Scientific note:</strong>
+                CDS features represent annotated coding sequences.
+                Multiple CDS features may belong to the same gene because
+                of alternative transcripts. Therefore, CDS count and
+                unique gene count are not necessarily equal.
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>Annotated Coding Sequences</h3>
+
+            <p class="help">
+                {% if search_term %}
+                    Search results for "{{ search_term }}".
+                {% else %}
+                    Browse the annotated CDS records in genomic coordinate order.
+                {% endif %}
+            </p>
+
+            <p>
+                Displaying
+                <strong>{{ cds_records | length }}</strong>
+                records on this page.
+                Total matching records:
+                <strong>{{ total_records }}</strong>.
+            </p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Gene</th>
+                            <th>Locus tag</th>
+                            <th>Product</th>
+                            <th>Protein ID</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Strand</th>
+                            <th>CDS length</th>
+                            <th>Protein length</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for cds in cds_records %}
+                        <tr>
+                            <td>{{ cds.gene }}</td>
+                            <td>{{ cds.locus_tag }}</td>
+                            <td>{{ cds.product }}</td>
+                            <td>{{ cds.protein_id }}</td>
+                            <td>{{ "{:,}".format(cds.start) }}</td>
+                            <td>{{ "{:,}".format(cds.end) }}</td>
+                            <td><span class="badge">{{ cds.strand }}</span></td>
+                            <td>{{ cds.cds_length }}</td>
+                            <td>{{ cds.protein_length }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9">
+                                No matching CDS records were found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+
+                {% if page > 1 %}
+                <a href="{{ url_for('annotation',
+                    analysis_mode='genome_explorer',
+                    accession=genome_summary.accession,
+                    search=search_term,
+                    page=page - 1) }}">
+                    Previous
+                </a>
+                {% else %}
+                <a class="disabled" href="#">Previous</a>
+                {% endif %}
+
+                <span>Page {{ page }} of {{ total_pages }}</span>
+
+                {% if page < total_pages %}
+                <a href="{{ url_for('annotation',
+                    analysis_mode='genome_explorer',
+                    accession=genome_summary.accession,
+                    search=search_term,
+                    page=page + 1) }}">
+                    Next
+                </a>
+                {% else %}
+                <a class="disabled" href="#">Next</a>
+                {% endif %}
+
+            </div>
+        </div>
+
+        {% endif %}
+
+    </section>
 
 </main>
 
 <footer>
-    OmicsBridge | Genomics • Transcriptomics • Protein Annotation
-    <br>
-    Computational predictions should be interpreted with appropriate
-    biological evidence.
+    OmicsHelixa | Bioinformatics Exploration Platform
 </footer>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+    function showMode(mode) {
+        const proteinSection = document.getElementById("proteinMode");
+        const genomeSection = document.getElementById("genomeMode");
 
-    /*
-       1. POSITION THE COORDINATE RULER TICKS
-    */
+        const proteinButton = document.getElementById("proteinModeButton");
+        const genomeButton = document.getElementById("genomeModeButton");
 
-    document.querySelectorAll(".ruler-tick[data-position]").forEach(function (tick) {
+        const isGenome = mode === "genome";
 
-        const position = Number(tick.dataset.position);
+        proteinSection.hidden = isGenome;
+        genomeSection.hidden = !isGenome;
 
-        if (Number.isFinite(position)) {
-            tick.style.left = position + "%";
-        }
+        proteinButton.classList.toggle("active", !isGenome);
+        genomeButton.classList.toggle("active", isGenome);
+    }
 
-    });
+    const parameters = new URLSearchParams(window.location.search);
 
-
-    /*
-       2. SET THE HEIGHT OF EACH READING-FRAME TRACK
-    */
-
-    document.querySelectorAll(".track-area[data-height]").forEach(function (track) {
-
-        const height = Number(track.dataset.height);
-
-        if (Number.isFinite(height) && height > 0) {
-            track.style.height = height + "px";
-        }
-
-    });
-
-
-    /*
-       3. POSITION AND SIZE EACH PREDICTED ORF
-    */
-
-    document.querySelectorAll(".orf-block[data-left]").forEach(function (orf) {
-
-        const lane = Number(orf.dataset.lane);
-        const left = Number(orf.dataset.left);
-        const width = Number(orf.dataset.width);
-
-        if (
-            Number.isFinite(lane) &&
-            Number.isFinite(left) &&
-            Number.isFinite(width)
-        ) {
-
-            orf.style.setProperty("--lane", lane);
-            orf.style.setProperty("--orf-left", left + "%");
-            orf.style.setProperty("--orf-width", width + "%");
-
-        }
-
-    });
-
-});
+    if (parameters.get("analysis_mode") === "genome_explorer") {
+        showMode("genome");
+    }
 </script>
 
 </body>

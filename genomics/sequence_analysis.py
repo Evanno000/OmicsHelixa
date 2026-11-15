@@ -20,14 +20,21 @@ def analyze_sequence(sequence):
     # 2. VALIDATE DNA SEQUENCE
     # --------------------------------------
 
-    allowed_bases = set("ATGCN")
+    # Full standard DNA IUPAC alphabet
+    allowed_bases = set("ATGCRYSWKMBDHVN")
 
     if not sequence:
         raise ValueError("The DNA sequence is empty.")
 
-    if not set(sequence).issubset(allowed_bases):
+    invalid_bases = set(sequence) - allowed_bases
+
+    if invalid_bases:
+        invalid_list = ", ".join(sorted(invalid_bases))
+
         raise ValueError(
-            "Invalid DNA sequence. Use only A, T, G, C and N."
+            f"Invalid DNA characters detected: {invalid_list}. "
+            "Use standard DNA IUPAC codes: "
+            "A, T, G, C, R, Y, S, W, K, M, B, D, H, V and N."
         )
 
     # Create Biopython sequence object
@@ -44,19 +51,51 @@ def analyze_sequence(sequence):
     n_count = sequence.count("N")
 
     # --------------------------------------
-    # 4. GC CONTENT
+    # 4. AMBIGUOUS NUCLEOTIDE COMPOSITION
     # --------------------------------------
 
-    gc_content = gc_fraction(dna, ambiguous="remove") * 100
+    ambiguity_codes = {
+        "R": "A or G",
+        "Y": "C or T",
+        "S": "G or C",
+        "W": "A or T",
+        "K": "G or T",
+        "M": "A or C",
+        "B": "C, G or T",
+        "D": "A, G or T",
+        "H": "A, C or T",
+        "V": "A, C or G",
+        "N": "Any nucleotide"
+    }
+
+    ambiguous_bases = {
+        code: sequence.count(code)
+        for code in ambiguity_codes
+    }
+
+    ambiguous_count = sum(ambiguous_bases.values())
 
     # --------------------------------------
-    # 5. REVERSE COMPLEMENT
+    # 5. GC CONTENT
     # --------------------------------------
 
-    reverse_complement = str(dna.reverse_complement())
+    # Ambiguous positions are excluded from
+    # the GC calculation.
+    gc_content = gc_fraction(
+        dna,
+        ambiguous="remove"
+    ) * 100
 
     # --------------------------------------
-    # 6. RETURN ANALYSIS RESULTS
+    # 6. REVERSE COMPLEMENT
+    # --------------------------------------
+
+    reverse_complement = str(
+        dna.reverse_complement()
+    )
+
+    # --------------------------------------
+    # 7. RETURN ANALYSIS RESULTS
     # --------------------------------------
 
     results = {
@@ -68,6 +107,10 @@ def analyze_sequence(sequence):
         "G": g_count,
         "C": c_count,
         "N": n_count,
+
+        "ambiguous_count": ambiguous_count,
+
+        "ambiguous_bases": ambiguous_bases,
 
         "GC_content": round(gc_content, 2),
 

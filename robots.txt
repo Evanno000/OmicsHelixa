@@ -1,0 +1,5 @@
+
+User-agent: *
+Allow: /
+
+Sitemap: https://omicshelixa.onrender.com/sitemap.xml

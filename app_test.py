@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, send_from_directory
 from werkzeug.exceptions import RequestEntityTooLarge
 from Bio.Seq import Seq
 from io import BytesIO
@@ -743,6 +743,30 @@ def fasta_download(sequence, filename, description):
 def home():
 
     return render_template("index.html")
+
+
+# ============================================================
+# SEO FILES: ROBOTS.TXT AND SITEMAP.XML
+# ============================================================
+
+@app.route("/robots.txt")
+def robots_txt():
+
+    return send_from_directory(
+        app.root_path,
+        "robots.txt",
+        mimetype="text/plain"
+    )
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+
+    return send_from_directory(
+        app.root_path,
+        "sitemap.xml",
+        mimetype="application/xml"
+    )
 
 
 # ============================================================

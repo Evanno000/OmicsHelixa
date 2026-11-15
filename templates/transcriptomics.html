@@ -1,0 +1,691 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>OmicsBridge | Transcriptomics Workspace</title>
+
+    <style>
+
+        :root {
+            --page: #f1f5ff;
+            --surface: #ffffff;
+            --text: #172554;
+            --muted: #64748b;
+            --teal: #0f9d91;
+            --blue: #3978e8;
+            --purple: #8155d9;
+            --pink: #d94c91;
+            --orange: #e78a36;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: var(--page);
+            color: var(--text);
+        }
+
+        nav {
+            background: #14274e;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        nav .brand {
+            color: white;
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+        nav a {
+            color: #e0eaff;
+            text-decoration: none;
+            margin-left: 16px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #64e5d2;
+        }
+
+        .hero {
+            padding: 42px 6%;
+            color: white;
+            background: linear-gradient(
+                120deg,
+                #087e83,
+                #1766b6,
+                #6545b5
+            );
+        }
+
+        .hero h1 {
+            margin: 0 0 12px;
+            font-size: 32px;
+        }
+
+        .hero p {
+            max-width: 750px;
+            line-height: 1.7;
+            color: #e4f4ff;
+        }
+
+        .hero-tag {
+            display: inline-block;
+            background: rgba(255,255,255,0.17);
+            padding: 7px 13px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 14px;
+        }
+
+        .container {
+            width: 88%;
+            max-width: 1200px;
+            margin: 30px auto 60px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 23px;
+            box-shadow: 0 5px 18px rgba(30, 64, 120, 0.06);
+            border: 1px solid var(--border);
+        }
+
+        .input-panel {
+            border-top: 5px solid var(--teal);
+        }
+
+        .summary-panel {
+            border-top: 5px solid var(--blue);
+        }
+
+        .sequence-panel {
+            border-top: 5px solid var(--purple);
+        }
+
+        .translation-panel {
+            border-top: 5px solid var(--pink);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 21px;
+        }
+
+        .section-description {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 155px;
+            resize: vertical;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: Consolas, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(15,157,145,0.12);
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 15px 0;
+            padding: 12px;
+            width: 100%;
+            background: #f8fafc;
+            border: 1px dashed #94a3b8;
+            border-radius: 9px;
+        }
+
+        button {
+            border: none;
+            border-radius: 9px;
+            padding: 12px 19px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            background: var(--teal);
+            transition: 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
+
+        .analyze-button {
+            background: linear-gradient(90deg, #0c9e92, #2877d8);
+            padding: 13px 25px;
+        }
+
+        .download-button {
+            background: #334e83;
+            font-size: 12px;
+            margin-top: 12px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit,
+                minmax(145px, 1fr)
+            );
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            padding: 19px;
+            border-radius: 12px;
+            color: white;
+        }
+
+        .stat-card span {
+            display: block;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .stat-card strong {
+            display: block;
+            font-size: 27px;
+            margin-top: 8px;
+        }
+
+        .stat-length {
+            background: linear-gradient(135deg, #3279db, #2455aa);
+        }
+
+        .stat-a {
+            background: linear-gradient(135deg, #16a99c, #087e83);
+        }
+
+        .stat-u {
+            background: linear-gradient(135deg, #e69a36, #d66a24);
+        }
+
+        .stat-g {
+            background: linear-gradient(135deg, #845bd7, #6240b5);
+        }
+
+        .stat-c {
+            background: linear-gradient(135deg, #db579a, #b93275);
+        }
+
+        .stat-n {
+            background: linear-gradient(135deg, #64748b, #475569);
+        }
+
+        .stat-gc {
+            background: linear-gradient(135deg, #1a9a72, #14734f);
+        }
+
+        .sequence-box {
+            background: #101d37;
+            color: #a9f3dc;
+            padding: 17px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .sequence-label {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 18px 0 9px;
+        }
+
+        .error {
+            background: #fff0f0;
+            border-left: 5px solid #dc4444;
+            padding: 16px;
+            border-radius: 8px;
+            color: #a32626;
+            margin-bottom: 20px;
+        }
+
+        .notice {
+            background: #fff8e7;
+            border-left: 5px solid #e8a32f;
+            color: #805b15;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-top: 15px;
+        }
+
+        .empty-state {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        footer {
+            background: #14274e;
+            color: #cbd5e1;
+            padding: 25px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        @media (max-width: 650px) {
+
+            nav {
+                align-items: flex-start;
+            }
+
+            nav a {
+                margin: 0 10px 0 0;
+                display: inline-block;
+            }
+
+            .container {
+                width: 94%;
+            }
+
+            .hero h1 {
+                font-size: 25px;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<nav>
+
+    <div class="brand">OmicsBridge</div>
+
+    <div>
+        <a href="/">Home</a>
+        <a href="/genomics">Genomics</a>
+        <a href="/transcriptomics">Transcriptomics</a>
+        <a href="/integration">Integration</a>
+    </div>
+
+</nav>
+
+
+<header class="hero">
+
+    <div class="hero-tag">
+        RNA SEQUENCE ANALYSIS
+    </div>
+
+    <h1>Transcriptomics Workspace</h1>
+
+    <p>
+        Explore RNA sequences through nucleotide composition,
+        GC-content calculation, sequence transformations and
+        protein translation. Build a foundation for understanding
+        gene expression and transcript biology.
+    </p>
+
+</header>
+
+
+<main class="container">
+
+
+    {% if error %}
+
+    <div class="error">
+
+        <strong>Analysis error:</strong>
+        {{ error }}
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- RNA INPUT -->
+
+    <section class="panel input-panel">
+
+        <h2>RNA Sequence Input</h2>
+
+        <p class="section-description">
+            Paste an RNA sequence below or upload a FASTA file.
+            Accepted nucleotide characters are A, U, G, C and N.
+        </p>
+
+        <form
+            method="POST"
+            action="{{ url_for('transcriptomics') }}"
+            enctype="multipart/form-data"
+        >
+
+            <label for="sequence">
+                <strong>Paste RNA sequence</strong>
+            </label>
+
+            <textarea
+                id="sequence"
+                name="sequence"
+                placeholder="Example: AUGGCCAUUGUAAUGGGCCGCUGAAAGGGUGCCCGA"
+            >{{ sequence_input or "" }}</textarea>
+
+
+            <label for="file">
+                <strong>Upload RNA FASTA file</strong>
+            </label>
+
+            <input
+                type="file"
+                id="file"
+                name="file"
+                accept=".fa,.fasta,.fna,.txt"
+            >
+
+
+            <button
+                type="submit"
+                class="analyze-button"
+            >
+                Analyze RNA Sequence
+            </button>
+
+        </form>
+
+    </section>
+
+
+    {% if results %}
+
+
+    <!-- RNA COMPOSITION -->
+
+    <section class="panel summary-panel">
+
+        <h2>RNA Composition Analysis</h2>
+
+        <p class="section-description">
+            Summary of nucleotide distribution and sequence GC content.
+        </p>
+
+        <div class="stats-grid">
+
+            <div class="stat-card stat-length">
+                <span>Sequence Length</span>
+                <strong>{{ results.sequence_length }}</strong>
+                <span>nucleotides</span>
+            </div>
+
+            <div class="stat-card stat-a">
+                <span>Adenine (A)</span>
+                <strong>{{ results.A }}</strong>
+            </div>
+
+            <div class="stat-card stat-u">
+                <span>Uracil (U)</span>
+                <strong>{{ results.U }}</strong>
+            </div>
+
+            <div class="stat-card stat-g">
+                <span>Guanine (G)</span>
+                <strong>{{ results.G }}</strong>
+            </div>
+
+            <div class="stat-card stat-c">
+                <span>Cytosine (C)</span>
+                <strong>{{ results.C }}</strong>
+            </div>
+
+            <div class="stat-card stat-n">
+                <span>Unknown (N)</span>
+                <strong>{{ results.N }}</strong>
+            </div>
+
+            <div class="stat-card stat-gc">
+                <span>GC Content</span>
+                <strong>{{ results.GC_content }}%</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- RNA TRANSFORMATIONS -->
+
+    <section class="panel sequence-panel">
+
+        <h2>RNA Sequence Transformations</h2>
+
+        <p class="section-description">
+            Explore complementary RNA, reverse-complement RNA
+            and the DNA equivalent of the submitted RNA sequence.
+        </p>
+
+
+        <div class="sequence-label">
+            Original RNA Sequence
+        </div>
+
+        <div class="sequence-box">{{ sequence_input }}</div>
+
+
+        <div class="sequence-label">
+            Complementary RNA
+        </div>
+
+        <div class="sequence-box">{{ results.complementary_sequence }}</div>
+
+        <form
+            method="POST"
+            action="{{ url_for('download_rna_complement') }}"
+        >
+
+            <input
+                type="hidden"
+                name="sequence"
+                value="{{ sequence_input }}"
+            >
+
+            <button class="download-button" type="submit">
+                Download RNA Complement
+            </button>
+
+        </form>
+
+
+        <div class="sequence-label">
+            Reverse Complement RNA
+        </div>
+
+        <div class="sequence-box">{{ results.reverse_complement }}</div>
+
+        <form
+            method="POST"
+            action="{{ url_for('download_rna_reverse_complement') }}"
+        >
+
+            <input
+                type="hidden"
+                name="sequence"
+                value="{{ sequence_input }}"
+            >
+
+            <button class="download-button" type="submit">
+                Download Reverse Complement
+            </button>
+
+        </form>
+
+
+        <div class="sequence-label">
+            DNA Equivalent
+        </div>
+
+        <div class="sequence-box">{{ dna_sequence }}</div>
+
+        <form
+            method="POST"
+            action="{{ url_for('download_rna_dna') }}"
+        >
+
+            <input
+                type="hidden"
+                name="sequence"
+                value="{{ sequence_input }}"
+            >
+
+            <button class="download-button" type="submit">
+                Download DNA Sequence
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- RNA TRANSLATION -->
+
+    <section class="panel translation-panel">
+
+        <h2>RNA Translation</h2>
+
+        <p class="section-description">
+            Translate the submitted RNA sequence into its
+            corresponding amino acid sequence using the standard
+            genetic code.
+        </p>
+
+
+        {% if protein_sequence %}
+
+            <div class="sequence-label">
+                Translated Protein Sequence
+            </div>
+
+            <div class="sequence-box">{{ protein_sequence }}</div>
+
+            <form
+                method="POST"
+                action="{{ url_for('download_rna_protein') }}"
+            >
+
+                <input
+                    type="hidden"
+                    name="sequence"
+                    value="{{ sequence_input }}"
+                >
+
+                <button class="download-button" type="submit">
+                    Download Protein FASTA
+                </button>
+
+            </form>
+
+        {% else %}
+
+            <div class="notice">
+
+                This RNA sequence does not have a length divisible
+                by three. Complete-codon translation is therefore
+                unavailable. Sequence composition and other
+                transformations were still calculated.
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="notice">
+
+            Translation here starts at the first nucleotide and
+            uses the standard genetic code. A stop codon is shown
+            as an asterisk (*). This is not yet a full transcript
+            annotation or gene-expression analysis.
+
+        </div>
+
+    </section>
+
+
+    {% else %}
+
+
+    <!-- EMPTY STATE -->
+
+    <section class="panel">
+
+        <div class="empty-state">
+
+            <h2>Ready for RNA Analysis?</h2>
+
+            <p>
+                Submit an RNA sequence above to explore its
+                nucleotide composition, GC content, complementary
+                sequences, DNA equivalent and translated protein.
+            </p>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+</main>
+
+
+<footer>
+
+    OmicsBridge | Genomics • Transcriptomics • Omics Integration
+
+    <br><br>
+
+    Computational exploration of molecular biology
+
+</footer>
+
+
+</body>
+</html>

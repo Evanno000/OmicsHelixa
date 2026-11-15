@@ -1,0 +1,1359 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmicsBridge | Genomics Workspace</title>
+
+    <style>
+        :root {
+            --page: #eef4ff;
+            --surface: #ffffff;
+            --ink: #172554;
+            --muted: #64748b;
+            --line: #dbe5f3;
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --orange: #ea580c;
+            --orange-dark: #c2410c;
+            --green: #15803d;
+            --purple: #7c3aed;
+            --pink: #db2777;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--page);
+            color: var(--ink);
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.55;
+        }
+
+        /* HEADER AND NAVIGATION */
+
+        header {
+            background: linear-gradient(
+                120deg,
+                #101c3d,
+                #173b70,
+                #075985
+            );
+            color: white;
+            padding: 22px max(5%, calc((100% - 1200px) / 2));
+            border-bottom: 4px solid #38bdf8;
+            box-shadow: 0 5px 18px rgba(15, 23, 42, .15);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.9rem;
+            letter-spacing: .5px;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            color: #bae6fd;
+        }
+
+        nav {
+            margin-top: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        nav a {
+            color: #e2e8f0;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 7px 12px;
+            border-radius: 7px;
+            transition: .2s ease;
+        }
+
+        nav a:hover {
+            color: white;
+            background: rgba(255,255,255,.14);
+        }
+
+        main {
+            width: min(1200px, 92%);
+            margin: 28px auto 60px;
+        }
+
+        /* PANELS */
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-top: 4px solid #3b82f6;
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 22px;
+            box-shadow: 0 6px 20px rgba(30, 64, 175, .06);
+            transition: box-shadow .2s ease;
+        }
+
+        .panel:hover {
+            box-shadow: 0 9px 25px rgba(30, 64, 175, .10);
+        }
+
+        .panel h2 {
+            margin: 0 0 12px;
+            font-size: 1.3rem;
+            color: #1e3a8a;
+            padding-bottom: 9px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .panel h3 {
+            margin: 0 0 8px;
+            font-size: 1.02rem;
+            color: #334155;
+        }
+
+        .muted,
+        .hint {
+            color: var(--muted);
+        }
+
+        /* INDIVIDUAL SECTION COLOURS */
+
+        .input-panel {
+            border-top-color: #0ea5e9;
+            background: linear-gradient(145deg, #ffffff, #f0f9ff);
+        }
+
+        .summary-panel {
+            border-top-color: #16a34a;
+            background: linear-gradient(145deg, #ffffff, #f0fdf4);
+        }
+
+        .orf-panel {
+            border-top-color: #8b5cf6;
+            background: linear-gradient(145deg, #ffffff, #f5f3ff);
+        }
+
+        .table-panel {
+            border-top-color: #f97316;
+            background: linear-gradient(145deg, #ffffff, #fff7ed);
+        }
+
+        .translation-panel {
+            border-top-color: #db2777;
+            background: linear-gradient(145deg, #ffffff, #fdf2f8);
+        }
+
+        /* INPUT FIELDS */
+
+        textarea,
+        input[type="file"] {
+            width: 100%;
+            border: 1px solid #93c5fd;
+            border-radius: 8px;
+            padding: 12px;
+            background: #f8fbff;
+            font: inherit;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+        textarea {
+            min-height: 170px;
+            resize: vertical;
+        }
+
+        textarea:focus,
+        input[type="file"]:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+        }
+
+        /* BUTTONS */
+
+        button,
+        .download-button {
+            display: inline-block;
+            border: 0;
+            border-radius: 8px;
+            padding: 10px 16px;
+            background: linear-gradient(120deg, #2563eb, #0ea5e9);
+            color: white;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            margin-top: 12px;
+            box-shadow: 0 3px 8px rgba(37, 99, 235, .18);
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+
+        button:hover,
+        .download-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(37, 99, 235, .25);
+        }
+
+        button.secondary {
+            background: linear-gradient(120deg, #475569, #334155);
+        }
+
+        /* ERRORS */
+
+        .error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* SEQUENCE STATISTICS */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+            gap: 12px;
+        }
+
+        .stat {
+            border: 0;
+            border-radius: 12px;
+            padding: 15px;
+            transition: transform .2s ease;
+        }
+
+        .stat:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 1.55rem;
+        }
+
+        .stat span {
+            font-size: .88rem;
+            opacity: .85;
+        }
+
+        .stats .stat:nth-child(1) {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .stats .stat:nth-child(2) {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .stats .stat:nth-child(3) {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .stats .stat:nth-child(4) {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .stats .stat:nth-child(5) {
+            background: #f3e8ff;
+            color: #6b21a8;
+        }
+
+        .stats .stat:nth-child(6) {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .stats .stat:nth-child(7) {
+            background: #ccfbf1;
+            color: #115e59;
+        }
+
+        /* SEQUENCE DISPLAY */
+
+        .sequence-box {
+            max-height: 260px;
+            overflow: auto;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            background: #101c3d;
+            color: #a7f3d0;
+            border: 1px solid #334e7e;
+            border-radius: 10px;
+            padding: 12px;
+            font-family: Consolas, monospace;
+            font-size: .85rem;
+            line-height: 1.8;
+        }
+
+        /* ORF MAP SUMMARY */
+
+        .map-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .summary-chip {
+            padding: 7px 12px;
+            background: #e0e7ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 20px;
+            font-size: .86rem;
+            color: #3730a3;
+            font-weight: 600;
+        }
+
+        /* ORF LEGEND */
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin: 14px 0;
+        }
+
+        .legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+
+        .swatch {
+            width: 13px;
+            height: 13px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .forward {
+            background: var(--blue);
+        }
+
+        .reverse {
+            background: var(--orange);
+        }
+
+        /* ORF MAP */
+
+        .map-container {
+            background: linear-gradient(145deg, #eff6ff, #f5f3ff);
+            border: 1px solid #c7d2fe;
+            border-radius: 14px;
+            padding: 15px;
+        }
+
+        .track {
+            background: #ffffff;
+            border: 1px solid #c7d2fe;
+            border-left: 4px solid #6366f1;
+            border-radius: 11px;
+            padding: 12px;
+            margin: 11px 0;
+            box-shadow: 0 2px 7px rgba(30, 41, 59, .04);
+        }
+
+        .track:nth-child(-n+3) {
+            border-left-color: #2563eb;
+        }
+
+        .track:nth-child(n+4) {
+            border-left-color: #f97316;
+        }
+
+        .track-heading {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 5px;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+
+        .track-heading small {
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        .track-scroll {
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        .track svg {
+            width: 100%;
+            min-width: 650px;
+            height: auto;
+            display: block;
+        }
+
+        .coordinate-line {
+            stroke: #94a3b8;
+            stroke-width: 2;
+        }
+
+        .coordinate-tick {
+            stroke: #64748b;
+            stroke-width: 1;
+        }
+
+        .coordinate-label {
+            fill: #64748b;
+            font-size: 11px;
+        }
+
+        .orf-block {
+            cursor: pointer;
+            transition: opacity .15s ease, filter .15s ease;
+        }
+
+        .orf-block:hover {
+            opacity: .9;
+            filter: drop-shadow(0 2px 4px rgba(15, 23, 42, .3));
+        }
+
+        .orf-block:focus {
+            outline: none;
+            filter: drop-shadow(0 0 3px #0f172a);
+        }
+
+        .orf-label {
+            fill: white;
+            font-size: 10px;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        /* FORWARD AND REVERSE TRACK COLOURS */
+
+        .track:nth-child(-n+3) .orf-block rect {
+            fill: #2563eb !important;
+        }
+
+        .track:nth-child(-n+3) .orf-block polygon {
+            fill: #1d4ed8 !important;
+        }
+
+        .track:nth-child(n+4) .orf-block rect {
+            fill: #f97316 !important;
+        }
+
+        .track:nth-child(n+4) .orf-block polygon {
+            fill: #c2410c !important;
+        }
+
+        .map-instructions {
+            font-size: .88rem;
+            color: var(--muted);
+            margin-top: 12px;
+        }
+
+        /* ORF DETAILS */
+
+        .details-heading {
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+        .orf-details {
+            border: 1px solid #ddd6fe;
+            border-left: 4px solid #8b5cf6;
+            border-radius: 10px;
+            margin: 9px 0;
+            background: #faf5ff;
+            overflow: hidden;
+        }
+
+        .orf-details:nth-of-type(even) {
+            border-left-color: #0ea5e9;
+            background: #f0f9ff;
+        }
+
+        .orf-details summary {
+            padding: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            color: #5b21b6;
+            list-style-position: inside;
+        }
+
+        .orf-details summary:hover {
+            background: #ede9fe;
+        }
+
+        .orf-details[open] summary {
+            border-bottom: 1px solid var(--line);
+            background: #ede9fe;
+        }
+
+        .orf-detail-content {
+            padding: 15px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .detail-item {
+            padding: 10px;
+            border: 1px solid #ddd6fe;
+            background: white;
+            border-radius: 9px;
+        }
+
+        .detail-item small {
+            display: block;
+            color: #7c3aed;
+        }
+
+        .detail-item strong {
+            display: block;
+            overflow-wrap: anywhere;
+        }
+
+        /* ORF TABLE */
+
+        .orf-table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 720px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+        }
+
+        th {
+            background: #312e81;
+            color: white;
+            font-size: .9rem;
+            padding: 13px 10px;
+        }
+
+        td {
+            font-size: .92rem;
+            color: #334155;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f5f3ff;
+        }
+
+        tbody tr:nth-child(odd) {
+            background: #ffffff;
+        }
+
+        tbody tr:hover {
+            background: #dbeafe;
+        }
+
+        .orf-link {
+            color: #6d28d9;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .orf-link:hover {
+            text-decoration: underline;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 20px;
+            background: #dbeafe;
+            color: #1e40af;
+            font-size: .8rem;
+            font-weight: 700;
+        }
+
+        /* TRANSLATION CARDS */
+
+        .translation-card {
+            background: linear-gradient(120deg, #fff1f2, #fdf2f8);
+            border: 1px solid #f9a8d4;
+            border-left: 5px solid #db2777;
+            border-radius: 12px;
+            padding: 14px;
+            margin: 12px 0;
+            transition: transform .2s ease;
+        }
+
+        .translation-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .translation-card h3 {
+            color: #9d174d;
+        }
+
+        .translation-card form {
+            display: inline;
+        }
+
+        /* RESPONSIVE DESIGN */
+
+        @media (max-width: 650px) {
+
+            .panel {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            header {
+                padding: 18px 4%;
+            }
+
+            header h1 {
+                font-size: 1.55rem;
+            }
+
+            main {
+                width: 94%;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .track svg {
+                min-width: 600px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+
+    <h1>OmicsBridge</h1>
+
+    <p>Genomics Workspace | DNA sequence analysis and ORF exploration</p>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/genomics">Genomics</a>
+        <a href="/transcriptomics">Transcriptomics</a>
+        <a href="/integration">Omics Integration</a>
+        <a href="/annotation">NCBI Annotation</a>
+    </nav>
+
+</header>
+
+<main>
+
+    <!-- DNA INPUT -->
+
+    <section class="panel input-panel">
+
+        <h2>DNA Sequence Analysis</h2>
+
+        <p class="muted">
+            Paste a DNA sequence or upload a FASTA file.
+            Analysis includes nucleotide composition, six-frame translation
+            and predicted open reading frames.
+        </p>
+
+        <form method="POST" enctype="multipart/form-data">
+
+            <label for="sequence">
+                <strong>DNA sequence or FASTA text</strong>
+            </label>
+
+            <textarea
+                id="sequence"
+                name="sequence"
+                placeholder="Paste DNA sequence here, or upload a FASTA file below..."
+            >{{ sequence_input or "" }}</textarea>
+
+            <p>
+                <label for="file">
+                    <strong>Upload FASTA file</strong>
+                </label>
+            </p>
+
+            <input
+                id="file"
+                type="file"
+                name="file"
+                accept=".fa,.fasta,.fna,.txt"
+            >
+
+            <button type="submit">
+                Analyze sequence
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- ERROR MESSAGE -->
+
+    {% if error %}
+
+    <div class="error">
+        <strong>Analysis error:</strong> {{ error }}
+    </div>
+
+    {% endif %}
+
+
+    {% if results %}
+
+
+    <!-- SEQUENCE SUMMARY -->
+
+    <section class="panel summary-panel">
+
+        <h2>Sequence Summary</h2>
+
+        <div class="stats">
+
+            <div class="stat">
+                <strong>{{ results.sequence_length }}</strong>
+                <span>Sequence length (bp)</span>
+            </div>
+
+            <div class="stat">
+                <strong>{{ results.A }}</strong>
+                <span>Adenine (A)</span>
+            </div>
+
+            <div class="stat">
+                <strong>{{ results.T }}</strong>
+                <span>Thymine (T)</span>
+            </div>
+
+            <div class="stat">
+                <strong>{{ results.G }}</strong>
+                <span>Guanine (G)</span>
+            </div>
+
+            <div class="stat">
+                <strong>{{ results.C }}</strong>
+                <span>Cytosine (C)</span>
+            </div>
+
+            <div class="stat">
+                <strong>{{ results.N }}</strong>
+                <span>Ambiguous (N)</span>
+            </div>
+
+            <div class="stat">
+                <strong>{{ results.GC_content }}%</strong>
+                <span>GC content</span>
+            </div>
+
+        </div>
+
+        <h3 style="margin-top:18px;">
+            Reverse complement
+        </h3>
+
+        <div class="sequence-box">
+            {{ results.reverse_complement }}
+        </div>
+
+        <form method="POST" action="/download-reverse-complement">
+
+            <input
+                type="hidden"
+                name="sequence"
+                value="{{ sequence_input }}"
+            >
+
+            <button class="secondary" type="submit">
+                Download reverse complement FASTA
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- INTERACTIVE ORF MAP -->
+
+    <section class="panel orf-panel">
+
+        <h2>Six-Frame ORF Map</h2>
+
+        <p class="muted">
+            Explore predicted open reading frames across all six reading frames.
+            Coordinates are mapped to the original DNA sequence.
+        </p>
+
+        {% if predicted_orfs %}
+
+        <div class="map-summary">
+
+            <span class="summary-chip">
+                Sequence: {{ sequence_length }} bp
+            </span>
+
+            <span class="summary-chip">
+                Predicted ORFs: {{ predicted_orfs|length }}
+            </span>
+
+            <span class="summary-chip">
+                Reading frames: 6
+            </span>
+
+        </div>
+
+        <div class="legend">
+
+            <span>
+                <i class="swatch forward"></i>
+                Forward strand (+) — rightward
+            </span>
+
+            <span>
+                <i class="swatch reverse"></i>
+                Reverse strand (−) — leftward
+            </span>
+
+        </div>
+
+        <div class="map-container">
+
+            {% set plot_left = 85 %}
+            {% set plot_width = 950 %}
+
+            {% for track in orf_tracks %}
+
+            {% set lane_total = [track.lane_count, 1]|max %}
+            {% set svg_height = 75 + (lane_total * 30) %}
+
+            <div class="track">
+
+                <div class="track-heading">
+
+                    <span>
+                        {% if track.strand == "+" %}
+                            Forward strand
+                        {% else %}
+                            Reverse strand
+                        {% endif %}
+
+                        — Frame {{ track.frame }}
+                    </span>
+
+                    <small>
+                        {{ track.orfs|length }} predicted ORF(s)
+                    </small>
+
+                </div>
+
+                <div class="track-scroll">
+
+                    <svg
+                        viewBox="0 0 1100 {{ svg_height }}"
+                        role="img"
+                        aria-label="{{ track.strand }} strand, frame {{ track.frame }}"
+                    >
+
+                        <!-- COORDINATE RULER -->
+
+                        <line
+                            class="coordinate-line"
+                            x1="{{ plot_left }}"
+                            y1="28"
+                            x2="{{ plot_left + plot_width }}"
+                            y2="28"
+                        />
+
+                        <text
+                            x="{{ plot_left }}"
+                            y="15"
+                            class="coordinate-label"
+                        >1 bp</text>
+
+                        <text
+                            x="{{ plot_left + plot_width }}"
+                            y="15"
+                            text-anchor="end"
+                            class="coordinate-label"
+                        >{{ sequence_length }} bp</text>
+
+                        {% for tick in track.ticks %}
+
+                        {% set tick_x = plot_left + ((tick - 1) / sequence_length) * plot_width %}
+
+                        <line
+                            class="coordinate-tick"
+                            x1="{{ tick_x }}"
+                            y1="23"
+                            x2="{{ tick_x }}"
+                            y2="35"
+                        />
+
+                        <text
+                            x="{{ tick_x }}"
+                            y="49"
+                            text-anchor="middle"
+                            class="coordinate-label"
+                        >{{ tick }}</text>
+
+                        {% endfor %}
+
+
+                        <!-- ORF BLOCKS -->
+
+                        {% for orf in track.orfs %}
+
+                        {% set x = plot_left + ((orf.start - 1) / sequence_length) * plot_width %}
+
+                        {% set w = [((orf.end - orf.start + 1) / sequence_length) * plot_width, 7]|max %}
+
+                        {% set y = 60 + (orf.lane * 30) %}
+
+                        <a
+                            href="#orf-detail-{{ orf.number }}"
+                            onclick="openOrfDetails(event, 'orf-detail-{{ orf.number }}')"
+                            aria-label="Open details for ORF {{ orf.number }}"
+                        >
+
+                            <g class="orf-block" tabindex="0">
+
+                                {% if track.strand == "+" %}
+
+                                    <rect
+                                        x="{{ x }}"
+                                        y="{{ y }}"
+                                        width="{{ [w - 8, 1]|max }}"
+                                        height="19"
+                                        rx="3"
+                                        fill="#2563eb"
+                                    />
+
+                                    {% if w >= 13 %}
+
+                                    <polygon
+                                        points="{{ x + w - 9 }},{{ y }} {{ x + w }},{{ y + 9.5 }} {{ x + w - 9 }},{{ y + 19 }}"
+                                        fill="#1d4ed8"
+                                    />
+
+                                    {% endif %}
+
+                                {% else %}
+
+                                    <rect
+                                        x="{{ x + 8 }}"
+                                        y="{{ y }}"
+                                        width="{{ [w - 8, 1]|max }}"
+                                        height="19"
+                                        rx="3"
+                                        fill="#ea580c"
+                                    />
+
+                                    {% if w >= 13 %}
+
+                                    <polygon
+                                        points="{{ x + 9 }},{{ y }} {{ x }},{{ y + 9.5 }} {{ x + 9 }},{{ y + 19 }}"
+                                        fill="#c2410c"
+                                    />
+
+                                    {% endif %}
+
+                                {% endif %}
+
+                                {% if w >= 38 %}
+
+                                <text
+                                    x="{{ x + 12 }}"
+                                    y="{{ y + 13.5 }}"
+                                    class="orf-label"
+                                >
+                                    ORF{{ orf.number }}
+                                </text>
+
+                                {% endif %}
+
+                                <title>
+                                    ORF {{ orf.number }} |
+                                    {{ orf.strand }} strand |
+                                    Frame {{ orf.frame }} |
+                                    Coordinates {{ orf.start }}–{{ orf.end }} |
+                                    {{ orf.length }} amino acids |
+                                    {{ orf.overlap_status }}
+                                </title>
+
+                            </g>
+
+                        </a>
+
+                        {% endfor %}
+
+                        {% if not track.orfs %}
+
+                        <text
+                            x="{{ plot_left }}"
+                            y="78"
+                            font-size="12"
+                            fill="#94a3b8"
+                        >
+                            No ORFs detected in this frame
+                        </text>
+
+                        {% endif %}
+
+                    </svg>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        <p class="map-instructions">
+            Select any ORF block to open its detailed information.
+            Arrow direction indicates coding direction. The ruler shows
+            nucleotide positions along the original DNA sequence.
+        </p>
+
+
+        <!-- INTERACTIVE ORF DETAILS -->
+
+        <h3 class="details-heading">
+            Interactive ORF Details
+        </h3>
+
+        <p class="muted">
+            Select an ORF below or click its block in the map.
+        </p>
+
+        {% for orf in predicted_orfs %}
+
+        <details
+            class="orf-details"
+            id="orf-detail-{{ orf.number }}"
+        >
+
+            <summary>
+
+                ORF {{ orf.number }}
+
+                &nbsp; | &nbsp;
+
+                {{ orf.strand }} strand
+
+                &nbsp; | &nbsp;
+
+                Frame {{ orf.frame }}
+
+                &nbsp; | &nbsp;
+
+                {{ orf.length }} aa
+
+            </summary>
+
+            <div class="orf-detail-content">
+
+                <div class="detail-grid">
+
+                    <div class="detail-item">
+                        <small>ORF number</small>
+                        <strong>{{ orf.number }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <small>Strand</small>
+                        <strong>{{ orf.strand }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <small>Reading frame</small>
+                        <strong>{{ orf.frame }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <small>Start coordinate</small>
+                        <strong>{{ orf.start }} bp</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <small>End coordinate</small>
+                        <strong>{{ orf.end }} bp</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <small>Protein length</small>
+                        <strong>{{ orf.length }} amino acids</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <small>Overlap classification</small>
+                        <strong>{{ orf.overlap_status }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <small>Nested in</small>
+
+                        <strong>
+                            {% if orf.nested_in %}
+                                {{ orf.nested_in|join(", ") }}
+                            {% else %}
+                                None
+                            {% endif %}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+                <h3>DNA sequence</h3>
+
+                <div class="sequence-box">
+                    {{ orf.dna_sequence }}
+                </div>
+
+                <h3 style="margin-top:15px;">
+                    Predicted protein sequence
+                </h3>
+
+                <div class="sequence-box">
+                    {{ orf.protein_sequence }}
+                </div>
+
+            </div>
+
+        </details>
+
+        {% endfor %}
+
+        {% else %}
+
+        <p class="muted">
+            No ORFs of at least 30 amino acids were detected in this sequence.
+        </p>
+
+        {% endif %}
+
+        <p class="hint">
+            ORFs are computational predictions. Their presence alone
+            does not establish that a gene is expressed or has a
+            particular biological function.
+        </p>
+
+    </section>
+
+
+    <!-- PREDICTED ORF TABLE -->
+
+    <section class="panel table-panel">
+
+        <h2>Predicted ORFs</h2>
+
+        {% if predicted_orfs %}
+
+        <p class="muted">
+            Detected {{ predicted_orfs|length }} ORF(s), using a
+            minimum predicted protein length of 30 amino acids.
+            Select an ORF number to view its details.
+        </p>
+
+        <div class="orf-table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>ORF</th>
+                        <th>Strand</th>
+                        <th>Frame</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Length</th>
+                        <th>Overlap classification</th>
+                        <th>Nested in</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for orf in predicted_orfs %}
+
+                    <tr>
+
+                        <td>
+                            <a
+                                class="orf-link"
+                                href="#orf-detail-{{ orf.number }}"
+                                onclick="openOrfDetails(event, 'orf-detail-{{ orf.number }}')"
+                            >
+                                ORF {{ orf.number }}
+                            </a>
+                        </td>
+
+                        <td>
+                            <span class="pill">{{ orf.strand }}</span>
+                        </td>
+
+                        <td>{{ orf.frame }}</td>
+
+                        <td>{{ orf.start }}</td>
+
+                        <td>{{ orf.end }}</td>
+
+                        <td>{{ orf.length }} aa</td>
+
+                        <td>{{ orf.overlap_status }}</td>
+
+                        <td>
+                            {% if orf.nested_in %}
+                                {{ orf.nested_in|join(", ") }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <form method="POST" action="/download-longest-orf">
+
+            <input
+                type="hidden"
+                name="sequence"
+                value="{{ sequence_input }}"
+            >
+
+            <button class="secondary" type="submit">
+                Download longest ORF protein FASTA
+            </button>
+
+        </form>
+
+        {% else %}
+
+        <p class="muted">
+            No qualifying ORFs were found.
+        </p>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- SIX-FRAME TRANSLATION -->
+
+    <section class="panel translation-panel">
+
+        <h2>Six-Frame Translation</h2>
+
+        <p class="muted">
+            Translations are shown in the order returned by the analysis:
+            forward frames 1–3, followed by reverse frames 1–3.
+        </p>
+
+        {% for item in translations %}
+
+        <div class="translation-card">
+
+            <h3>
+                {{ item.strand }} strand — Frame {{ item.frame }}
+            </h3>
+
+            <div class="sequence-box">
+                {{ item.protein_sequence }}
+            </div>
+
+            <form method="POST" action="/download-protein-fasta">
+
+                <input
+                    type="hidden"
+                    name="protein_sequence"
+                    value="{{ item.protein_sequence }}"
+                >
+
+                <button class="secondary" type="submit">
+                    Download this protein translation
+                </button>
+
+            </form>
+
+        </div>
+
+        {% endfor %}
+
+    </section>
+
+    {% endif %}
+
+</main>
+
+
+<script>
+
+    // Open selected ORF details.
+
+    function openOrfDetails(event, detailsId) {
+
+        event.preventDefault();
+
+        const selectedDetails = document.getElementById(detailsId);
+
+        if (!selectedDetails) {
+            return;
+        }
+
+        // Close other ORF detail panels.
+
+        document.querySelectorAll(".orf-details").forEach(function(item) {
+
+            if (item.id !== detailsId) {
+                item.open = false;
+            }
+
+        });
+
+        // Open selected ORF.
+
+        selectedDetails.open = true;
+
+        selectedDetails.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+    }
+
+</script>
+
+</body>
+</html>

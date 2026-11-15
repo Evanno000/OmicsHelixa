@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>OmicsBridge | Bioinformatics Platform</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <h1>OmicsBridge</h1>
+                <p>Connecting Genomics. Understanding Biology.</p>
+            </div>
+
+            <nav>
+                <a href="/">Home</a>
+                <a href="/genomics">Genomics</a>
+                <a href="/annotation">NCBI Annotation</a>
+                <a href="/transcriptomics">Transcriptomics</a>
+                <a href="/integration">Integration</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h2>Explore Pathogen Biology Through Multi-Omics Analysis</h2>
+
+        <p>
+            OmicsBridge is a bioinformatics platform designed to
+            explore and integrate genomic and transcriptomic data
+            to improve our understanding of pathogen biology.
+        </p>
+    </section>
+
+    <section class="organism">
+        <p>
+            <strong>Research organism:</strong>
+            Plasmodium falciparum
+        </p>
+    </section>
+
+    <section class="modules">
+
+        <h2>Research Modules</h2>
+
+        <div class="module-container">
+
+            <div class="module-card">
+                <h3>Genomics</h3>
+                <p>
+                    Explore DNA sequences, genetic variation
+                    and genomic features.
+                </p>
+                <a href="/genomics">Open Genomics</a>
+            </div>
+
+            <div class="module-card">
+                <h3>NCBI Annotation</h3>
+                <p>
+                    Retrieve NCBI records and compare predicted
+                    ORFs with annotated proteins.
+                </p>
+                <a href="/annotation">Open Annotation</a>
+            </div>
+
+            <div class="module-card">
+                <h3>Transcriptomics</h3>
+                <p>
+                    Analyse gene expression patterns and
+                    explore transcriptional activity.
+                </p>
+                <a href="/transcriptomics">Open Transcriptomics</a>
+            </div>
+
+            <div class="module-card">
+                <h3>Omics Integration</h3>
+                <p>
+                    Connect genomic and transcriptomic
+                    information to explore biological patterns.
+                </p>
+                <a href="/integration">Open Integration</a>
+            </div>
+
+        </div>
+
+    </section>
+
+    <footer>
+        <p>OmicsBridge | Bioinformatics Research Platform</p>
+    </footer>
+
+</body>
+</html>

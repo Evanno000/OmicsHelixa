@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>OmicsBridge | Multi-Omics Integration</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6fc;
+            color: #26344a;
+        }
+
+        nav {
+            background: #172554;
+            color: white;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        nav h2 {
+            font-size: 22px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+            font-size: 14px;
+        }
+
+        nav a:hover {
+            color: #67e8f9;
+        }
+
+        .hero {
+            padding: 55px 7%;
+            color: white;
+            background: linear-gradient(120deg, #312e81, #2563eb, #0891b2);
+        }
+
+        .hero h1 {
+            font-size: 34px;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            max-width: 750px;
+            line-height: 1.7;
+            color: #e0f2fe;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .panel {
+            background: white;
+            padding: 28px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.05);
+        }
+
+        h2, h3 {
+            color: #172554;
+        }
+
+        .panel h2 {
+            margin-bottom: 12px;
+        }
+
+        .description {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        input[type="file"] {
+            margin-top: 18px;
+            width: 100%;
+        }
+
+        button {
+            background: linear-gradient(120deg, #2563eb, #0891b2);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .download-button {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 11px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            background: linear-gradient(120deg, #2563eb, #7c3aed);
+            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.15);
+        }
+
+        .download-button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 9px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+            padding: 15px;
+            border-radius: 9px;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 11px;
+            border-left: 5px solid #2563eb;
+        }
+
+        .stat-card:nth-child(2) {
+            border-color: #059669;
+        }
+
+        .stat-card:nth-child(3) {
+            border-color: #9333ea;
+        }
+
+        .stat-card:nth-child(4) {
+            border-color: #ea580c;
+        }
+
+        .stat-card h4 {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card strong {
+            font-size: 25px;
+            color: #172554;
+        }
+
+        .sequence-box {
+            background: #f8fafc;
+            padding: 18px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .sequence-box h3 {
+            margin-bottom: 12px;
+        }
+
+        .sequence {
+            font-family: monospace;
+            line-height: 1.8;
+            word-break: break-all;
+            color: #334155;
+        }
+
+        .dna {
+            border-left: 5px solid #2563eb;
+        }
+
+        .rna {
+            border-left: 5px solid #059669;
+        }
+
+        .protein {
+            border-left: 5px solid #9333ea;
+        }
+
+        .composition-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .amino-card {
+            background: #f5f3ff;
+            padding: 13px;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .amino-card strong {
+            display: block;
+            font-size: 20px;
+            color: #6d28d9;
+        }
+
+        .amino-card span {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .workflow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .workflow-card {
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            background: #eff6ff;
+        }
+
+        .workflow-card h3 {
+            margin-bottom: 8px;
+        }
+
+        .workflow-card p {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        footer {
+            background: #172554;
+            color: #cbd5e1;
+            text-align: center;
+            padding: 25px;
+            margin-top: 40px;
+            font-size: 13px;
+        }
+
+        @media(max-width: 600px) {
+            nav {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            nav a {
+                margin: 0 10px 0 0;
+            }
+
+            .hero h1 {
+                font-size: 27px;
+            }
+
+            .panel {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav>
+    <h2>🧬 OmicsBridge</h2>
+
+    <div>
+        <a href="/">Home</a>
+        <a href="/genomics">Genomics</a>
+        <a href="/transcriptomics">Transcriptomics</a>
+        <a href="/annotation">Annotation</a>
+        <a href="/integration">Integration</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <h1>Multi-Omics Integration</h1>
+
+    <p>
+        Explore the flow of biological information from
+        DNA to RNA to proteins. Analyse the molecular
+        relationships connecting different omics layers.
+    </p>
+</section>
+
+<main class="container">
+
+    <section class="panel">
+
+        <h2>Central Dogma Sequence Explorer</h2>
+
+        <p class="description">
+            Enter a DNA coding-strand sequence or upload
+            a FASTA file. OmicsBridge will calculate DNA
+            composition, generate the corresponding mRNA
+            and translate the sequence into a protein.
+        </p>
+
+        {% if error %}
+        <div class="error">
+            <strong>Analysis error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <form
+            method="POST"
+            action="{{ url_for('integration') }}"
+            enctype="multipart/form-data"
+        >
+
+            <label><strong>DNA Coding Strand Sequence</strong></label>
+
+            <textarea
+                name="sequence"
+                placeholder="Paste your DNA sequence here (A, T, G, C, N)..."
+            >{{ sequence_input or '' }}</textarea>
+
+            <label><strong>Or upload a FASTA file</strong></label>
+
+            <input
+                type="file"
+                name="file"
+                accept=".fasta,.fa,.txt"
+            >
+
+            <button type="submit">
+                Analyse Integrated Omics
+            </button>
+
+        </form>
+
+    </section>
+
+    {% if results %}
+
+    <div class="success">
+        <strong>Analysis completed successfully!</strong>
+        DNA, RNA and protein information has been generated.
+    </div>
+
+    <section class="panel">
+
+        <h2>Integrated Analysis Summary</h2>
+
+        <div class="stats">
+
+            <div class="stat-card">
+                <h4>DNA Length</h4>
+                <strong>{{ results.dna_length }}</strong>
+            </div>
+
+            <div class="stat-card">
+                <h4>GC Content</h4>
+                <strong>{{ results.gc_content }}%</strong>
+            </div>
+
+            <div class="stat-card">
+                <h4>mRNA Length</h4>
+                <strong>{{ results.mrna_length }}</strong>
+            </div>
+
+            <div class="stat-card">
+                <h4>Protein Length</h4>
+                <strong>{{ results.protein_length }}</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="panel">
+
+        <h2>1. Genomics — DNA Analysis</h2>
+
+        <div class="stats">
+
+            {% for base, count in [
+                ('A', results.dna_A),
+                ('T', results.dna_T),
+                ('G', results.dna_G),
+                ('C', results.dna_C),
+                ('N', results.dna_N)
+            ] %}
+
+            <div class="stat-card">
+                <h4>{{ base }} Nucleotides</h4>
+                <strong>{{ count }}</strong>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        <div class="sequence-box dna">
+            <h3>DNA Coding Strand</h3>
+
+            <div class="sequence">
+                {{ results.dna_sequence }}
+            </div>
+
+            <form
+                method="POST"
+                action="{{ url_for('download_integration_dna') }}"
+            >
+                <input
+                    type="hidden"
+                    name="sequence"
+                    value="{{ results.dna_sequence }}"
+                >
+
+                <button type="submit" class="download-button">
+                    ⬇ Download DNA FASTA
+                </button>
+            </form>
+
+        </div>
+
+    </section>
+
+    <section class="panel">
+
+        <h2>2. Transcriptomics — RNA Analysis</h2>
+
+        <p class="description">
+            The coding DNA strand is converted into its
+            corresponding RNA sequence by replacing T with U.
+        </p>
+
+        <div class="sequence-box rna">
+            <h3>Generated mRNA</h3>
+
+            <div class="sequence">
+                {{ results.mrna_sequence }}
+            </div>
+
+            <form
+                method="POST"
+                action="{{ url_for('download_integration_rna') }}"
+            >
+                <input
+                    type="hidden"
+                    name="sequence"
+                    value="{{ results.mrna_sequence }}"
+                >
+
+                <button type="submit" class="download-button">
+                    ⬇ Download mRNA FASTA
+                </button>
+            </form>
+
+        </div>
+
+    </section>
+
+    <section class="panel">
+
+        <h2>3. Proteomics — Protein Analysis</h2>
+
+        <div class="sequence-box protein">
+            <h3>Translated Protein Sequence</h3>
+
+            <div class="sequence">
+                {{ results.protein_sequence }}
+            </div>
+
+            <form
+                method="POST"
+                action="{{ url_for('download_integration_protein') }}"
+            >
+                <input
+                    type="hidden"
+                    name="sequence"
+                    value="{{ results.protein_sequence }}"
+                >
+
+                <button type="submit" class="download-button">
+                    ⬇ Download Protein FASTA
+                </button>
+            </form>
+
+        </div>
+
+        <div class="stats">
+
+            <div class="stat-card">
+                <h4>Complete Codons</h4>
+                <strong>{{ results.complete_codons }}</strong>
+            </div>
+
+            <div class="stat-card">
+                <h4>Stop Codons</h4>
+                <strong>{{ results.stop_codons }}</strong>
+            </div>
+
+            <div class="stat-card">
+                <h4>Incomplete Bases</h4>
+                <strong>{{ results.incomplete_bases }}</strong>
+            </div>
+
+        </div>
+
+        <h3 style="margin-top:25px;">
+            Amino Acid Composition
+        </h3>
+
+        <div class="composition-grid">
+
+            {% for amino_acid, count in results.amino_acid_counts.items() %}
+
+            <div class="amino-card">
+                <strong>{{ count }}</strong>
+                <span>{{ amino_acid }}</span>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+    <section class="panel">
+
+        <h2>Biological Information Flow</h2>
+
+        <p class="description">
+            The three major molecular levels examined
+            in this initial integration workflow.
+        </p>
+
+        <div class="workflow">
+
+            <div class="workflow-card">
+                <h3>🧬 Genomics</h3>
+                <p>DNA stores genetic information.</p>
+            </div>
+
+            <div class="workflow-card">
+                <h3>🧪 Transcriptomics</h3>
+                <p>Transcription produces RNA.</p>
+            </div>
+
+            <div class="workflow-card">
+                <h3>🔬 Proteomics</h3>
+                <p>Translation produces amino acid sequences.</p>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    OmicsBridge | Genomics • Transcriptomics • Omics Integration
+    <br><br>
+    Computational exploration of biological systems
+</footer>
+
+</body>
+</html>

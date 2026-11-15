@@ -40,6 +40,47 @@
     <!-- Browser theme -->
     <meta name="theme-color" content="#0b1f33">
 
+    <!-- Schema.org Structured Data: JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Organization",
+                "@id": "https://omicshelixa.onrender.com/#organization",
+                "name": "OmicsHelixa",
+                "url": "https://omicshelixa.onrender.com/",
+                "description": "An integrated bioinformatics platform connecting genomics, transcriptomics, NCBI genome annotation and omics analysis."
+            },
+            {
+                "@type": "WebSite",
+                "@id": "https://omicshelixa.onrender.com/#website",
+                "url": "https://omicshelixa.onrender.com/",
+                "name": "OmicsHelixa",
+                "description": "Connecting Genomes, Transcriptomes and Biological Insights.",
+                "publisher": {
+                    "@id": "https://omicshelixa.onrender.com/#organization"
+                },
+                "inLanguage": "en"
+            },
+            {
+                "@type": "WebPage",
+                "@id": "https://omicshelixa.onrender.com/#webpage",
+                "url": "https://omicshelixa.onrender.com/",
+                "name": "OmicsHelixa | Bioinformatics, Genomics and Transcriptomics Platform",
+                "description": "Explore genomic and transcriptomic sequences, NCBI genome annotation and relationships between different levels of biological data.",
+                "isPartOf": {
+                    "@id": "https://omicshelixa.onrender.com/#website"
+                },
+                "about": {
+                    "@id": "https://omicshelixa.onrender.com/#organization"
+                },
+                "inLanguage": "en"
+            }
+        ]
+    }
+    </script>
+
     <!-- Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>

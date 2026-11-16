@@ -46,6 +46,10 @@
     }
     </script>
 
+    <!-- Shared OmicsHelixa Footer Stylesheet -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/footer.css') }}">
+
     <style>
 
         :root {
@@ -332,14 +336,6 @@
             text-align: center;
             color: var(--muted);
             line-height: 1.7;
-        }
-
-        footer {
-            background: #14274e;
-            color: #cbd5e1;
-            padding: 25px;
-            text-align: center;
-            font-size: 13px;
         }
 
         @media (max-width: 650px) {
@@ -713,15 +709,8 @@
 </main>
 
 
-<footer>
-
-    OmicsHelixa | Genomics • Transcriptomics • Omics Integration
-
-    <br><br>
-
-    Computational exploration of molecular biology
-
-</footer>
+<!-- SHARED OMICSHELIXA FOOTER -->
+{% include '_footer.html' %}
 
 
 </body>

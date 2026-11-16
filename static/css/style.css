@@ -1,5 +1,8 @@
 
-/* GENERAL STYLING */
+/* =========================================
+   GENERAL STYLING
+========================================= */
+
 * {
     margin: 0;
     padding: 0;
@@ -13,7 +16,11 @@ body {
     line-height: 1.6;
 }
 
-/* HEADER AND NAVIGATION */
+
+/* =========================================
+   HEADER AND NAVIGATION
+========================================= */
+
 header {
     background-color: #102D46;
     color: white;
@@ -55,7 +62,11 @@ nav a:hover {
     color: #65D6C4;
 }
 
-/* HERO SECTION */
+
+/* =========================================
+   HERO SECTION
+========================================= */
+
 .hero {
     padding: 90px 8%;
     background: linear-gradient(135deg, #102D46, #176B68);
@@ -74,17 +85,25 @@ nav a:hover {
     color: #E2E8F0;
 }
 
-/* RESEARCH ORGANISM */
+
+/* =========================================
+   RESEARCH ORGANISM
+========================================= */
+
 .organism {
     padding: 25px 8%;
     background-color: white;
 }
 
 .organism strong {
-    color: #176B68;
+    color: #17686b;
 }
 
-/* RESEARCH MODULES */
+
+/* =========================================
+   RESEARCH MODULES
+========================================= */
+
 .modules {
     padding: 60px 8%;
 }
@@ -112,16 +131,13 @@ nav a:hover {
     margin-bottom: 15px;
 }
 
-/* FOOTER */
-footer {
-    background-color: #102D46;
-    color: white;
-    text-align: center;
-    padding: 25px;
-}
 
-/* MOBILE RESPONSIVENESS */
+/* =========================================
+   MOBILE RESPONSIVENESS
+========================================= */
+
 @media (max-width: 768px) {
+
     .module-container {
         grid-template-columns: 1fr;
     }
@@ -129,4 +145,5 @@ footer {
     .hero h2 {
         font-size: 32px;
     }
+
 }

@@ -1,0 +1,88 @@
+
+/* =========================================
+   OMICSHELIXA SHARED PROFESSIONAL FOOTER
+========================================= */
+
+.site-footer {
+    background-color: #102D46;
+    color: white;
+    padding: 55px 8% 20px;
+    margin-top: 50px;
+}
+
+.footer-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 35px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-section h2 {
+    font-size: 25px;
+    color: #65D6C4;
+    margin-bottom: 15px;
+}
+
+.footer-section h3 {
+    font-size: 17px;
+    color: #65D6C4;
+    margin-bottom: 18px;
+}
+
+.footer-section p {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #E2E8F0;
+    margin-bottom: 12px;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section li {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #E2E8F0;
+}
+
+.footer-section a {
+    color: #E2E8F0;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.footer-section a:hover {
+    color: #65D6C4;
+}
+
+.footer-bottom {
+    border-top: 1px solid #36536A;
+    margin-top: 40px;
+    padding-top: 20px;
+    text-align: center;
+}
+
+.footer-bottom p {
+    font-size: 13px;
+    color: #CBD5E1;
+}
+
+
+/* RESPONSIVE FOOTER */
+
+@media (max-width: 768px) {
+    .footer-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+    }
+}
